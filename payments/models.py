@@ -32,7 +32,7 @@ class PaymentAttributeProxy(object):
         self._payment.extra_data = json.dumps(data)
 
 
-class BasePayment(models.Model):
+class BasePayment(models.Model, AbstractBasePayment):
     '''
     Represents a single transaction. Each instance has one or more PaymentItem.
     '''
@@ -78,6 +78,27 @@ class BasePayment(models.Model):
     class Meta:
         abstract = True
 
+    def save(self, **kwargs):
+        if not self.token:
+            tries = {}  # Stores a set of tried values
+            while True:
+                token = str(uuid4())
+                if token in tries and len(tries) >= 100:  # After 100 tries we are impliying an infinite loop
+                    raise SystemExit('A possible infinite loop was detected')
+                else:
+                    if not self.__class__._default_manager.filter(token=token).exists():
+                        self.token = token
+                        break
+                tries.add(token)
+
+        return super(BasePayment, self).save(**kwargs)
+
+    def __unicode__(self):
+        return self.variant
+
+class AbstractBasePayment(object):
+    """ Logic of BasePayment """
+
     def change_status(self, status, message=''):
         '''
         Updates the Payment status and sends the status_changed signal.
@@ -98,24 +119,6 @@ class BasePayment(models.Model):
         self.fraud_message = message
         if commit:
             self.save()
-
-    def save(self, **kwargs):
-        if not self.token:
-            tries = {}  # Stores a set of tried values
-            while True:
-                token = str(uuid4())
-                if token in tries and len(tries) >= 100:  # After 100 tries we are impliying an infinite loop
-                    raise SystemExit('A possible infinite loop was detected')
-                else:
-                    if not self.__class__._default_manager.filter(token=token).exists():
-                        self.token = token
-                        break
-                tries.add(token)
-
-        return super(BasePayment, self).save(**kwargs)
-
-    def __unicode__(self):
-        return self.variant
 
     def get_form(self, data=None):
         provider = provider_factory(self.variant)
