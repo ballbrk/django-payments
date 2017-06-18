@@ -7,6 +7,7 @@ from mock import patch, MagicMock, Mock
 from . import CyberSourceProvider, AUTHENTICATE_REQUIRED, ACCEPTED, \
     TRANSACTION_SETTLED
 from .. import PaymentStatus, PurchasedItem, RedirectNeeded
+from ..meta import create_get_address
 
 MERCHANT_ID = 'abcd1234'
 PASSWORD = '1234abdd1234abcd'
@@ -53,6 +54,9 @@ class Payment(Mock):
             PurchasedItem(
                 name='foo', quantity=Decimal('10'), price=Decimal('20'),
                 currency='USD', sku='bar')]
+
+    get_billing_address = create_get_address("billing")
+    get_shipping_address = create_get_address("billing")
 
 
 class TestCybersourceProvider(TestCase):

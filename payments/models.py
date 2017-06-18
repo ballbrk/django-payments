@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from .core import provider_factory
+from .meta import add_address_to_class, create_get_address
 from . import FraudStatus, PaymentStatus
 
 
@@ -31,6 +32,9 @@ class PaymentAttributeProxy(object):
         data[key] = value
         self._payment.extra_data = json.dumps(data)
 
+@add_address_to_class("billing")
+class BasePaymentWithAddress(AbstractBasePayment):
+    get_shipping_address = create_get_address("billing")
 
 class BasePayment(models.Model, AbstractBasePayment):
     '''
@@ -59,14 +63,6 @@ class BasePayment(models.Model, AbstractBasePayment):
         max_digits=9, decimal_places=2, default='0.0')
     tax = models.DecimalField(max_digits=9, decimal_places=2, default='0.0')
     description = models.TextField(blank=True, default='')
-    billing_first_name = models.CharField(max_length=256, blank=True)
-    billing_last_name = models.CharField(max_length=256, blank=True)
-    billing_address_1 = models.CharField(max_length=256, blank=True)
-    billing_address_2 = models.CharField(max_length=256, blank=True)
-    billing_city = models.CharField(max_length=256, blank=True)
-    billing_postcode = models.CharField(max_length=256, blank=True)
-    billing_country_code = models.CharField(max_length=2, blank=True)
-    billing_country_area = models.CharField(max_length=256, blank=True)
     billing_email = models.EmailField(blank=True)
     customer_ip_address = models.GenericIPAddressField(blank=True, null=True)
     extra_data = models.TextField(blank=True, default='')
