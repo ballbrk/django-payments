@@ -52,7 +52,7 @@ class StripeWidget(HiddenInput):
     if DJANGO_VERSION >= (1, 11, 0):
         def build_attrs(self, base_attrs, extra_attrs=None):
             extra_attrs = dict(extra_attrs or {}, id='id_stripe_token')
-            return super(StripeWidget, self).build_attrs(base_attrs, extra_attrs, **kwargs)
+            return super(StripeWidget, self).build_attrs(base_attrs, extra_attrs)
     else:
         def build_attrs(self, extra_attrs=None, **kwargs):
             extra_attrs = dict(extra_attrs or {}, id='id_stripe_token')
