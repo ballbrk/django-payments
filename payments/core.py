@@ -70,6 +70,8 @@ class BasicProvider(object):
         Converts *payment* into a form suitable for Django templates.
         '''
         from .forms import PaymentForm
+        if not data:
+            data = {}
         return PaymentForm(self.get_hidden_fields(payment).update(data),
                            self.get_action(payment), self._method)
 

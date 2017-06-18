@@ -10,6 +10,12 @@ def alias_class(name):
         setattr(self, name, value)
     return property(setalias, getalias, delalias)
 
+class AddressDict(dict):
+    __getattr__ = dict.__getitem__
+    # ignore writes
+    def __setattr__(self, key, value):
+        pass
+
 def create_get_address(typename):
     """ create getter  """
     # performance
@@ -23,44 +29,16 @@ def create_get_address(typename):
     country_code = "{}_country_code".format(typename)
     country_area = "{}_country_area".format(typename)
     def _get_address(self):
-        return {
-            "first_name": getattr(self, first_name),
-            "last_name": getattr(self, last_name),
-            "address_1": getattr(self, address_1),
-            "address_2": getattr(self, address_2),
-            "city": getattr(self, city),
-            "postcode": getattr(self, postcode),
-            "country_code": getattr(self, country_code),
-            "country_area": getattr(self, country_area)}
+        return AddressDict({
+            "first_name": getattr(self, first_name, None),
+            "last_name": getattr(self, last_name, None),
+            "address_1": getattr(self, address_1, None),
+            "address_2": getattr(self, address_2, None),
+            "city": getattr(self, city, None),
+            "postcode": getattr(self, postcode, None),
+            "country_code": getattr(self, country_code, None),
+            "country_area": getattr(self, country_area, None)})
     return _get_address
-
-def create_address(typename):
-    """ create getter setter """
-    # performance
-    # most performant would be exec but in banking area people are more conservative
-    _first_name = "{}_first_name".format(typename)
-    _last_name = "{}_last_name".format(typename)
-    _address_1 = "{}_address_1".format(typename)
-    _address_2 = "{}_address_2".format(typename)
-    _city = "{}_city".format(typename)
-    _postcode = "{}_postcode".format(typename)
-    _country_code = "{}_country_code".format(typename)
-    _country_area = "{}_country_area".format(typename)
-    @property
-    def _address(self):
-        if self._address_ob_cache:
-            return self._address_ob_cache
-        class _ob(object):
-            first_name = alias_class(self, _first_name)
-            last_name = alias_class(self, _last_name)
-            address_1 = alias_class(self, _address_1)
-            address_2 = alias_class(self, _address_2)
-            city = alias_class(self, _city)
-            postcode = alias_class(self, _postcode)
-            country_code = alias_class(self, _country_code)
-            country_area = alias_class(self, _country_area)
-        return _ob
-    return _address
 
 def add_address_to_class(typename):
     """ add address with prefix typename to class, add getter method """

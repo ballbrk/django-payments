@@ -5,6 +5,7 @@ import json
 
 from . import SofortProvider
 from .. import PaymentStatus, RedirectNeeded
+from ..meta import create_get_address
 
 SECRET = 'abcd1234'
 CLIENT_ID = '1234'
@@ -20,6 +21,16 @@ class Payment(Mock):
     transaction_id = None
     captured_amount = 0
     billing_first_name = 'John'
+    billing_last_name = 'Smith'
+    billing_address_1 = 'JohnStreet 23'
+    billing_address_2 = ''
+    billing_city = 'Neches'
+    billing_postcode = "75779"
+    billing_country_code = "US"
+    billing_country_area = "Tennessee"
+
+    get_billing_address = create_get_address("billing")
+    get_shipping_address = create_get_address("billing")
 
     def get_process_url(self):
         return 'http://example.com'

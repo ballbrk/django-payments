@@ -46,7 +46,8 @@ class SensitiveTextInput(TextInput):
         # 'name' from attrs
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, type=self.input_type)
+        final_attrs = self.build_attrs(attrs)
+        final_attrs["type"] = self.input_type
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.
             final_attrs['value'] = force_text(self.format_value(value))

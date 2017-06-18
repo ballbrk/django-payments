@@ -31,8 +31,8 @@ class StripeCheckoutWidget(Input):
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(
-            attrs, src="https://checkout.stripe.com/checkout.js")
+        final_attrs = self.build_attrs(attrs)
+        final_attrs["src"] = "https://checkout.stripe.com/checkout.js"
         del final_attrs['id']
         if value != '':
             # Only add the 'value' attribute if a value is non-empty.

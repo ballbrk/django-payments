@@ -20,7 +20,7 @@ class SelectPaymentForm(forms.Form):
         variant = getattr(settings, 'PAYMENT_VARIANTS_API', PAYMENT_VARIANTS_API).keys()
         variant = forms.ChoiceField(choices=map(lambda x: _(x), variant), required=True, label=_("Payment Method"))
     else:
-        variant = forms.ChoiceField(choices=getattr(settings, 'PAYMENT_VARIANTS', PAYMENT_VARIANTS).keys(), required=True, label=_("Payment Method"))
+        variant = forms.ChoiceField(choices=getattr(settings, 'PAYMENT_VARIANTS_API', PAYMENT_VARIANTS_API).keys(), required=True, label=_("Payment Method"))
 
 class PaymentForm(forms.Form):
     '''

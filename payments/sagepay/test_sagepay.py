@@ -73,7 +73,7 @@ class TestSagepayProvider(TestCase):
     def test_provider_encrypts_data(self):
         data = self.provider.get_hidden_fields(self.payment)
         decrypted_data = self.provider.aes_dec(data['Crypt'])
-        self.assertIn(self.payment.billing_first_name, str(decrypted_data))
+        self.assertIn(self.payment.get_billing_address()["first_name"], str(decrypted_data))
 
     def test_encrypt_method_returns_valid_data(self):
         encrypted = self.provider.aes_enc('mirumee')

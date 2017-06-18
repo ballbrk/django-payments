@@ -32,66 +32,6 @@ class PaymentAttributeProxy(object):
         data[key] = value
         self._payment.extra_data = json.dumps(data)
 
-@add_address_to_class("billing")
-class BasePaymentWithAddress(AbstractBasePayment):
-    get_shipping_address = create_get_address("billing")
-
-class BasePayment(models.Model, AbstractBasePayment):
-    '''
-    Represents a single transaction. Each instance has one or more PaymentItem.
-    '''
-    variant = models.CharField(max_length=255)
-    #: Transaction status
-    status = models.CharField(
-        max_length=10, choices=PaymentStatus.CHOICES,
-        default=PaymentStatus.WAITING)
-    fraud_status = models.CharField(
-        _('fraud check'), max_length=10, choices=FraudStatus.CHOICES,
-        default=FraudStatus.UNKNOWN)
-    fraud_message = models.TextField(blank=True, default='')
-    #: Creation date and time
-    created = models.DateTimeField(auto_now_add=True)
-    #: Date and time of last modification
-    modified = models.DateTimeField(auto_now=True)
-    #: Transaction ID (if applicable)
-    transaction_id = models.CharField(max_length=255, blank=True)
-    #: Currency code (may be provider-specific)
-    currency = models.CharField(max_length=10)
-    #: Total amount (gross)
-    total = models.DecimalField(max_digits=9, decimal_places=2, default='0.0')
-    delivery = models.DecimalField(
-        max_digits=9, decimal_places=2, default='0.0')
-    tax = models.DecimalField(max_digits=9, decimal_places=2, default='0.0')
-    description = models.TextField(blank=True, default='')
-    billing_email = models.EmailField(blank=True)
-    customer_ip_address = models.GenericIPAddressField(blank=True, null=True)
-    extra_data = models.TextField(blank=True, default='')
-    message = models.TextField(blank=True, default='')
-    token = models.CharField(max_length=36, blank=True, default='')
-    captured_amount = models.DecimalField(
-        max_digits=9, decimal_places=2, default='0.0')
-
-    class Meta:
-        abstract = True
-
-    def save(self, **kwargs):
-        if not self.token:
-            tries = {}  # Stores a set of tried values
-            while True:
-                token = str(uuid4())
-                if token in tries and len(tries) >= 100:  # After 100 tries we are impliying an infinite loop
-                    raise SystemExit('A possible infinite loop was detected')
-                else:
-                    if not self.__class__._default_manager.filter(token=token).exists():
-                        self.token = token
-                        break
-                tries.add(token)
-
-        return super(BasePayment, self).save(**kwargs)
-
-    def __unicode__(self):
-        return self.variant
-
 class AbstractBasePayment(object):
     """ Logic of BasePayment """
 
@@ -168,3 +108,63 @@ class AbstractBasePayment(object):
     @property
     def attrs(self):
         return PaymentAttributeProxy(self)
+
+class BasePayment(models.Model, AbstractBasePayment):
+    '''
+    Represents a single transaction. Each instance has one or more PaymentItem.
+    '''
+    variant = models.CharField(max_length=255)
+    #: Transaction status
+    status = models.CharField(
+        max_length=10, choices=PaymentStatus.CHOICES,
+        default=PaymentStatus.WAITING)
+    fraud_status = models.CharField(
+        _('fraud check'), max_length=10, choices=FraudStatus.CHOICES,
+        default=FraudStatus.UNKNOWN)
+    fraud_message = models.TextField(blank=True, default='')
+    #: Creation date and time
+    created = models.DateTimeField(auto_now_add=True)
+    #: Date and time of last modification
+    modified = models.DateTimeField(auto_now=True)
+    #: Transaction ID (if applicable)
+    transaction_id = models.CharField(max_length=255, blank=True)
+    #: Currency code (may be provider-specific)
+    currency = models.CharField(max_length=10)
+    #: Total amount (gross)
+    total = models.DecimalField(max_digits=9, decimal_places=2, default='0.0')
+    delivery = models.DecimalField(
+        max_digits=9, decimal_places=2, default='0.0')
+    tax = models.DecimalField(max_digits=9, decimal_places=2, default='0.0')
+    description = models.TextField(blank=True, default='')
+    billing_email = models.EmailField(blank=True)
+    customer_ip_address = models.GenericIPAddressField(blank=True, null=True)
+    extra_data = models.TextField(blank=True, default='')
+    message = models.TextField(blank=True, default='')
+    token = models.CharField(max_length=36, blank=True, default='')
+    captured_amount = models.DecimalField(
+        max_digits=9, decimal_places=2, default='0.0')
+
+    class Meta:
+        abstract = True
+
+    def save(self, **kwargs):
+        if not self.token:
+            tries = {}  # Stores a set of tried values
+            while True:
+                token = str(uuid4())
+                if token in tries and len(tries) >= 100:  # After 100 tries we are impliying an infinite loop
+                    raise SystemExit('A possible infinite loop was detected')
+                else:
+                    if not self.__class__._default_manager.filter(token=token).exists():
+                        self.token = token
+                        break
+                tries.add(token)
+
+        return super(BasePayment, self).save(**kwargs)
+
+    def __unicode__(self):
+        return self.variant
+
+@add_address_to_class("billing")
+class BasePaymentWithAddress(AbstractBasePayment):
+    get_shipping_address = create_get_address("billing")
