@@ -49,6 +49,7 @@ class BasicProvider(object):
     _method = 'post'
 
     def get_action(self, payment):
+        ''' Action for form '''
         return self.get_return_url(payment)
 
     def __init__(self, capture=True):
@@ -62,29 +63,30 @@ class BasicProvider(object):
         When implementing a new payment provider, overload this method to
         transfer provider-specific data.
         '''
-        raise NotImplementedError()
+        return {}
 
     def get_form(self, payment, data=None):
         '''
         Converts *payment* into a form suitable for Django templates.
         '''
         from .forms import PaymentForm
-        return PaymentForm(self.get_hidden_fields(payment),
+        return PaymentForm(self.get_hidden_fields(payment).update(data),
                            self.get_action(payment), self._method)
 
     def process_data(self, payment, request):
         '''
-        Process callback request from a payment provider.
+        Process callback request from a payment provider and update or create payment.
         '''
         raise NotImplementedError()
 
     def get_token_from_request(self, payment, request):
         '''
-        Return payment token from provider request.
+        Extract payment token from provider request and return. Needed for static payment creation.
         '''
         raise NotImplementedError()
 
     def get_return_url(self, payment, extra_data=None):
+        """ Get url customer visits, triggering the transaction """
         payment_link = payment.get_process_url()
         url = urljoin(get_base_url(), payment_link)
         if extra_data:
@@ -93,12 +95,15 @@ class BasicProvider(object):
         return url
 
     def capture(self, payment, amount=None):
+        ''' Capture a fraction of the total amount of a payment. Return amount captured '''
         raise NotImplementedError()
 
     def release(self, payment):
+        ''' Complete payment '''
         raise NotImplementedError()
 
     def refund(self, payment, amount=None):
+        ''' Refund payment, return amount refunded '''
         raise NotImplementedError()
 
 
