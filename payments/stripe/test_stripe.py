@@ -9,7 +9,6 @@ import stripe
 from . import StripeProvider, StripeCardProvider
 from .. import FraudStatus, PaymentStatus, RedirectNeeded
 
-
 SECRET_KEY = '1234abcd'
 PUBLIC_KEY = 'abcd1234'
 
@@ -179,4 +178,4 @@ class TestStripeProvider(TestCase):
         sensitive_fields = ['name', 'cvv2', 'expiration', 'number']
         for field_name in sensitive_fields:
             field = form[field_name]
-            self.assertTrue('name=' not in str(field))
+            self.assertFalse('name=' in str(field), "%s is not escaped" % field_name)

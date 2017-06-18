@@ -8,6 +8,7 @@ from django.forms.widgets import Input, HiddenInput
 from django.utils.html import format_html
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
+from django import VERSION as DJANGO_VERSION
 
 
 class StripeCheckoutWidget(Input):
@@ -31,7 +32,10 @@ class StripeCheckoutWidget(Input):
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs)
+        if DJANGO_VERSION >= (1, 11, 0):
+            final_attrs = self.build_attrs(self.attrs, attrs)
+        else:
+            final_attrs = self.build_attrs(attrs)
         final_attrs["src"] = "https://checkout.stripe.com/checkout.js"
         del final_attrs['id']
         if value != '':

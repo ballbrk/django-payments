@@ -34,9 +34,22 @@ class CreditCardExpiryWidget(MultiWidget):
         else:
             return [None, None]
 
-    def format_output(self, rendered_widgets):
-        ctx = {'month': rendered_widgets[0], 'year': rendered_widgets[1]}
-        return render_to_string('payments/credit_card_expiry_widget.html', ctx)
+    if DJANGO_VERSION <= (1, 10, 0):
+        def format_output(self, rendered_widgets):
+            ctx = {'month': rendered_widgets[0], 'year': rendered_widgets[1]}
+            return render_to_string('payments/credit_card_expiry_widget.html', ctx)
+
+
+    if DJANGO_VERSION >= (1, 11, 0):
+        def render(self, name, value, attrs=None, renderer=None):
+            """
+            Returns this Widget rendered as HTML, as a Unicode string.
+            """
+            context = self.get_context(name, value, attrs)
+            context["month"] = context['widget']['subwidgets'][0]
+            context["year"] = context['widget']['subwidgets'][1]
+            return self._render('payments/credit_card_expiry_widget.html', context, renderer)
+
 
 
 class SensitiveTextInput(TextInput):
