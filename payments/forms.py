@@ -11,13 +11,13 @@ from django.utils.translation import ugettext_lazy as _
 
 from .fields import (CreditCardNumberField, CreditCardExpiryField,
                      CreditCardVerificationField, CreditCardNameField)
-from .core import PAYMENT_VARIANTS
+from .core import PAYMENT_VARIANTS_API
 
 
 class SelectPaymentForm(forms.Form):
     """ Select a variant """
-    if getattr(settings, 'TRANSLATE_VARIANT', False):
-        variant = getattr(settings, 'PAYMENT_VARIANTS', PAYMENT_VARIANTS).keys()
+    if getattr(settings, 'TRANSLATE_VARIANTS', False):
+        variant = getattr(settings, 'PAYMENT_VARIANTS_API', PAYMENT_VARIANTS_API).keys()
         variant = forms.ChoiceField(choices=map(lambda x: _(x), variant), required=True, label=_("Payment Method"))
     else:
         variant = forms.ChoiceField(choices=getattr(settings, 'PAYMENT_VARIANTS', PAYMENT_VARIANTS).keys(), required=True, label=_("Payment Method"))
