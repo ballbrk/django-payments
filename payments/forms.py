@@ -6,11 +6,21 @@ except ImportError:
     from django.utils.datastructures import SortedDict as OrderedDict
 
 from django import forms
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from .fields import (CreditCardNumberField, CreditCardExpiryField,
                      CreditCardVerificationField, CreditCardNameField)
+from .core import PAYMENT_VARIANTS
 
+
+class SelectPaymentForm(forms.Form):
+    """ Select a variant """
+    if getattr(settings, 'TRANSLATE_VARIANT', False):
+        variant = getattr(settings, 'PAYMENT_VARIANTS', PAYMENT_VARIANTS).keys()
+        variant = forms.ChoiceField(choices=map(lambda x: _(x), variant), required=True, label=_("Payment Method"))
+    else:
+        variant = forms.ChoiceField(choices=getattr(settings, 'PAYMENT_VARIANTS', PAYMENT_VARIANTS).keys(), required=True, label=_("Payment Method"))
 
 class PaymentForm(forms.Form):
     '''
