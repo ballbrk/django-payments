@@ -149,7 +149,7 @@ class BasePayment(models.Model, AbstractBasePayment):
 
     def save(self, **kwargs):
         if not self.token:
-            tries = {}  # Stores a set of tried values
+            tries = set()  # Stores a set of tried values
             while True:
                 token = str(uuid4())
                 if token in tries and len(tries) >= 100:  # After 100 tries we are impliying an infinite loop
