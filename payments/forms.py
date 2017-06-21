@@ -16,11 +16,11 @@ from .core import PAYMENT_VARIANTS_API
 
 class SelectPaymentForm(forms.Form):
     """ Select a variant """
+    variants = getattr(settings, 'PAYMENT_VARIANTS_API', PAYMENT_VARIANTS_API).keys()
     if getattr(settings, 'TRANSLATE_VARIANTS', False):
-        variant = getattr(settings, 'PAYMENT_VARIANTS_API', PAYMENT_VARIANTS_API).keys()
-        variant = forms.ChoiceField(choices=map(lambda x: _(x), variant), required=True, label=_("Payment Method"))
+        variant = forms.ChoiceField(choices=map(lambda x: (x, _(x)), variants), required=True, label=_("Payment Method"))
     else:
-        variant = forms.ChoiceField(choices=getattr(settings, 'PAYMENT_VARIANTS_API', PAYMENT_VARIANTS_API).keys(), required=True, label=_("Payment Method"))
+        variant = forms.ChoiceField(choices=map(lambda x: (x, x), variants), required=True, label=_("Payment Method"))
 
 class PaymentForm(forms.Form):
     '''
