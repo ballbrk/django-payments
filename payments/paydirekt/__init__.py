@@ -140,18 +140,20 @@ class PaydirektProvider(BasicProvider):
         if self.overcapture and body["type"] == "ORDER":
             body["overcapture"] = True
 
+        shipping = payment.get_shipping_address()
+
         shipping = {
-            "addresseeGivenName": payment.billing_first_name,
-            "addresseeLastName": payment.billing_last_name,
-            "company": getattr(payment, "billing_company", None),
-            "additionalAddressInformation": payment.billing_address_2,
-            "street": payment.billing_address_1.rsplit(" ", 1)[0],
-            "streetNr": payment.billing_address_1.rsplit(" ", 1)[1],
-            "zip": payment.billing_postcode,
-            "city": payment.billing_city,
-            "countryCode": payment.billing_country_code,
-            "state": payment.billing_country_area,
-            "emailAddress": payment.billing_email
+            "addresseeGivenName": shipping.first_name,
+            "addresseeLastName": shipping.last_name,
+            "company": getattr(shipping, "company", None),
+            #"additionalAddressInformation": shipping.address_2,
+            "street": shipping.address_1,
+            "streetNr": shipping.address_2,
+            "zip": shipping.postcode,
+            "city": shipping.city,
+            "countryCode": shipping.country_code,
+            "state": shipping.country_area,
+            "emailAddress": shipping.billing_email
         }
         shipping = {k: v for k, v in shipping.items() if v}
         body = {k: v for k, v in body.items() if v}
