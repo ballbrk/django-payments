@@ -10,8 +10,12 @@ def alias_class(name):
         setattr(self, name, value)
     return property(setalias, getalias, delalias)
 
-class AddressDict(dict):
-    __getattr__ = dict.__getitem__
+class ParamDict(dict):
+    def __getattr__(self, key):
+        if key in self:
+            return self[key]
+        else
+            return None
     # ignore writes
     def __setattr__(self, key, value):
         pass
@@ -29,7 +33,7 @@ def create_get_address(typename):
     country_code = "{}_country_code".format(typename)
     country_area = "{}_country_area".format(typename)
     def _get_address(self):
-        return AddressDict({
+        return ParamDict({
             "first_name": getattr(self, first_name, None),
             "last_name": getattr(self, last_name, None),
             "address_1": getattr(self, address_1, None),
