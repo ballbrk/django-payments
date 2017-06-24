@@ -27,6 +27,7 @@ REQUIREMENTS = [
     'cryptography>=1.1.0',
     'PyJWT>=1.3.0',
     'requests>=1.2.0',
+    'simplejson>=3.6.5',
     'stripe>=1.9.8',
     'suds-jurko>=0.6',
     'xmltodict>=0.9.2']

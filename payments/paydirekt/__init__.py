@@ -17,7 +17,7 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 import os
 import email.utils
 import hmac
-import json
+import simplejson as json
 import time
 
 import requests
@@ -91,8 +91,8 @@ class PaydirektProvider(BasicProvider):
             "grantType" : "api_key",
             "randomNonce" : str(nonce, "ascii")
         }
-        response = requests.post(self.path_token.format(self.endpoint), json=body, headers=header)
-        token_raw = response.json()
+        response = requests.post(self.path_token.format(self.endpoint), data=json.dumps(body, use_decimal=True), headers=header)
+        token_raw = json.loads(response.text, use_decimal=True)
         if response.status_code != 200:
             self.token_raw = token_raw
             error_code = token_raw["messages"][0]["code"] if len(token_raw["messages"]) > 0 else None
@@ -160,9 +160,9 @@ class PaydirektProvider(BasicProvider):
 
         body["shippingAddress"] = shipping
 
-        response = requests.post(self.path_checkout.format(self.endpoint), json=body, headers=headers)
+        response = requests.post(self.path_checkout.format(self.endpoint), data=json.dumps(body, use_decimal=True), headers=headers)
         response.raise_for_status()
-        json_response = response.json()
+        json_response = json.loads(response.text, use_decimal=True)
         raise RedirectNeeded(json_response["_links"]["approve"]["href"])
 
     def process_data(self, payment, request):
@@ -202,9 +202,9 @@ class PaydirektProvider(BasicProvider):
             "callbackUrlStatusUpdates": self.get_return_url(payment)
         }
         response = requests.post(self.path_capture.format(self.endpoint, payment.transaction_id), \
-                                 json=body, headers=header)
+                                 data=json.dumps(body, use_decimal=True), headers=header)
         response.raise_for_status()
-        json_response = response.json()
+        json_response = json.loads(response.text, use_decimal=True)
         return json_response["amount"]
 
     def release(self, payment):
@@ -226,7 +226,7 @@ class PaydirektProvider(BasicProvider):
             "callbackUrlStatusUpdates": self.get_return_url(payment)
         }
         response = requests.post(self.path_refund.format(self.endpoint, payment.transaction_id), \
-                                 json=body, headers=header)
+                                 data=json.dumps(body, use_decimal=True), headers=header)
         response.raise_for_status()
-        json_response = response.json()
+        json_response = json.loads(response.text, use_decimal=True)
         return json_response["amount"]
