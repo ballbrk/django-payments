@@ -15,6 +15,7 @@ PACKAGES = [
     'payments.dummy',
     'payments.dotpay',
     'payments.paypal',
+    'payments.paydirekt',
     'payments.sagepay',
     'payments.sofort',
     'payments.stripe',
@@ -34,7 +35,7 @@ REQUIREMENTS = [
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
     test_args = []
-    
+
     def initialize_options(self):
         TestCommand.initialize_options(self)
         self.pytest_args = []
