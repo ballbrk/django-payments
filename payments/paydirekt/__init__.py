@@ -196,7 +196,7 @@ class PaydirektProvider(BasicProvider):
             amount = payment.total
         self.check_and_update_token()
         header = PaydirektProvider.header_default.copy()
-        header["Authorization"] = f"Bearer {self.access_token}"
+        header["Authorization"] = "Bearer %s" % self.access_token
         body = {
             "amount": amount,
             "callbackUrlStatusUpdates": self.get_return_url(payment)
@@ -210,7 +210,7 @@ class PaydirektProvider(BasicProvider):
     def release(self, payment):
         self.check_and_update_token()
         header = PaydirektProvider.header_default.copy()
-        header["Authorization"] = f"Bearer {self.access_token}"
+        header["Authorization"] = "Bearer %s" % self.access_token
         response = requests.post(self.path_release.format(self.endpoint, payment.transaction_id), \
                                  headers=header)
         response.raise_for_status()
@@ -220,7 +220,7 @@ class PaydirektProvider(BasicProvider):
             amount = payment.total
         self.check_and_update_token()
         header = PaydirektProvider.header_default.copy()
-        header["Authorization"] = f"Bearer {self.access_token}"
+        header["Authorization"] = "Bearer %s" % self.access_token
         body = {
             "amount": amount,
             "callbackUrlStatusUpdates": self.get_return_url(payment)
