@@ -14,7 +14,7 @@ class ParamDict(dict):
     def __getattr__(self, key):
         if key in self:
             return self[key]
-        else
+        else:
             return None
     # ignore writes
     def __setattr__(self, key, value):
