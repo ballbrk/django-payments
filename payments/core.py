@@ -81,7 +81,7 @@ class BasicProvider(object):
         '''
         raise NotImplementedError()
 
-    def get_token_from_request(self, payment, request):
+    def get_token_from_request(self, request):
         '''
         Extract payment token from provider request and return. Needed for static payment creation.
         '''

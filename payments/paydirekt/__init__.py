@@ -100,9 +100,6 @@ class PaydirektProvider(BasicProvider):
             raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
         self.access_token = token_raw["access_token"]
         self.expires_in = date_now+timedelta(seconds=token_raw["expires_in"])
-        if getattr(settings, "DEBUG", False):
-            self.token_raw = token_raw
-            self.token_uuid = token_uuid
 
     def check_and_update_token(self):
         """ Check if token exists or has expired, renew it in this case """
@@ -143,17 +140,17 @@ class PaydirektProvider(BasicProvider):
         shipping = payment.get_shipping_address()
 
         shipping = {
-            "addresseeGivenName": shipping.first_name,
-            "addresseeLastName": shipping.last_name,
-            "company": getattr(shipping, "company", None),
+            "addresseeGivenName": shipping["first_name"],
+            "addresseeLastName": shipping["last_name"],
+            "company": shipping.get("company", None),
             #"additionalAddressInformation": shipping.address_2,
-            "street": shipping.address_1,
-            "streetNr": shipping.address_2,
-            "zip": shipping.postcode,
-            "city": shipping.city,
+            "street": shipping["address_1"],
+            "streetNr": shipping["address_2"],
+            "zip": shipping["postcode"],
+            "city": shipping["city"],
             "countryCode": shipping.country_code,
-            "state": shipping.country_area,
-            "emailAddress": shipping.billing_email
+            "state": shipping["country_area"],
+            "emailAddress": shipping["billing_email"]
         }
         shipping = {k: v for k, v in shipping.items() if v}
         body = {k: v for k, v in body.items() if v}
@@ -169,27 +166,29 @@ class PaydirektProvider(BasicProvider):
         if request.status != 200:
             return
         try:
-            results = json.loads(request.body)
+            results = json.loads(request.body, use_decimal=True)
         except (ValueError, TypeError):
             return HttpResponseForbidden('FAILED')
-        if results.reasonCode != "APPROVED" and not payment.transaction_id:
-            payment.remove()
-        else:
-            if results.reasonCode == "APPROVED":
-                payment.transaction_id = results["checkoutId"]
-                if self._capture:
-                    payment.change_status(self.translate_status[results["checkoutStatus"]])
-                else:
-                    payment.change_status(PaymentStatus.PREAUTH)
+        if not payment.transaction_id:
+            payment.transaction_id = results["checkoutId"]
+        if results["checkoutStatus"] == "APPROVED":
+            if self._capture:
+                payment.change_status(PaymentStatus.CONFIRMED)
             else:
-                payment.change_status(self.translate_status[results["checkoutStatus"]])
-            payment.save()
+                payment.change_status(PaymentStatus.PREAUTH)
+        else:
+            payment.change_status(self.translate_status[results["checkoutStatus"]])
+        payment.save()
         return HttpResponse('OK')
 
-    def get_hidden_fields(self, payment):
-        return []
-    def get_token_from_request(self, payment, request):
-        return ""
+    def get_token_from_request(self, request):
+        if request.status != 200:
+            return None
+        try:
+            results = json.loads(request.body, use_decimal=True)
+        except (ValueError, TypeError):
+            return None
+        return results.get("checkoutId", None)
 
     def capture(self, payment, amount=None):
         if not amount:

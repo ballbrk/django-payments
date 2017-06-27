@@ -96,7 +96,7 @@ class TestGoogleWalletProvider(TestCase):
         request.POST = {'jwt': jwt.encode(JWT_DATA, SELLER_SECRET)}
         provider = GoogleWalletProvider(
             seller_id=SELLER_ID, seller_secret=SELLER_SECRET)
-        token = provider.get_token_from_request(None, request)
+        token = provider.get_token_from_request(request)
         self.assertEqual(token, PAYMENT_TOKEN)
 
     def test_provider_invalid_request(self):
@@ -104,7 +104,7 @@ class TestGoogleWalletProvider(TestCase):
         request.POST = {'jwt': 'wrong jwt data'}
         provider = GoogleWalletProvider(
             seller_id=SELLER_ID, seller_secret=SELLER_SECRET)
-        token = provider.get_token_from_request(None, request)
+        token = provider.get_token_from_request(request)
         self.assertFalse(token)
 
     def test_jwt_encoder(self):
