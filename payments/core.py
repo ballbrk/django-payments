@@ -58,19 +58,20 @@ class BasicProvider(object):
 
     def get_hidden_fields(self, payment):
         '''
-        Converts a payment into a dict containing transaction data. Use
+        Converts a payment into a dict containing (hidden) transaction data. Use
         get_form instead to get a form suitable for templates.
 
         When implementing a new payment provider, overload this method to
         transfer provider-specific data.
         '''
-        return {}
+        return None
 
     def get_form(self, payment, data=None):
         '''
         Converts *payment* into a form suitable for Django templates.
         Can return NeedsRedirect, ExternalPostNeeded to indicate a get redirect or a post redirect.
         With ExternalPostNeeded the self.autosubmit attribute of a form is set (remove that later?)
+        data is used to fill the form (e.g. after error, initial hidden data)
         '''
         from .forms import PaymentForm
         return PaymentForm(self.get_hidden_fields(payment),
