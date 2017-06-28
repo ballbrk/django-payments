@@ -173,7 +173,7 @@ class PaydirektProvider(BasicProvider):
         raise RedirectNeeded(json_response["_links"]["approve"]["href"])
 
     def process_data(self, payment, request):
-        if request.status not in [200,201]:
+        if request.status_code not in [200,201]:
             return HttpResponseForbidden('FAILED')
         try:
             results = json.loads(request.body, use_decimal=True)
