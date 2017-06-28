@@ -69,24 +69,24 @@ class SagepayProvider(BasicProvider):
             'Description': "Payment #%s" % (payment.pk,),
             'SuccessURL': return_url,
             'FailureURL': return_url,
-            'BillingSurname': _billing_address.last_name,
-            'BillingFirstnames': _billing_address.first_name,
-            'BillingAddress1': _billing_address.address_1,
-            'BillingAddress2': _billing_address.address_2,
-            'BillingCity': _billing_address.city,
-            'BillingPostCode': _billing_address.postcode,
-            'BillingCountry': _billing_address.country_code,
-            'DeliverySurname': _shipping_address.last_name,
-            'DeliveryFirstnames': _shipping_address.first_name,
-            'DeliveryAddress1': _shipping_address.address_1,
-            'DeliveryAddress2': _shipping_address.address_2,
-            'DeliveryCity': _shipping_address.city,
-            'DeliveryPostCode': _shipping_address.postcode,
-            'DeliveryCountry': _shipping_address.country_code}
-        if _billing_address.country_code == 'US':
-            data['BillingState'] = _billing_address.country_area
-        if _shipping_address.country_code == 'US':
-            data['DeliveryState'] = _shipping_address.country_area
+            'BillingSurname': _billing_address["last_name"],
+            'BillingFirstnames': _billing_address["first_name"],
+            'BillingAddress1': _billing_address["address_1"],
+            'BillingAddress2': _billing_address["address_2"],
+            'BillingCity': _billing_address["city"],
+            'BillingPostCode': _billing_address["postcode"],
+            'BillingCountry': _billing_address["country_code"],
+            'DeliverySurname': _shipping_address["last_name"],
+            'DeliveryFirstnames': _shipping_address["first_name"],
+            'DeliveryAddress1': _shipping_address["address_1"],
+            'DeliveryAddress2': _shipping_address["address_2"],
+            'DeliveryCity': _shipping_address["city"],
+            'DeliveryPostCode': _shipping_address["postcode"],
+            'DeliveryCountry': _shipping_address["country_code"]}
+        if _billing_address["country_code"] == 'US':
+            data['BillingState'] = _billing_address["country_area"]
+        if _shipping_address["country_code"] == 'US':
+            data['DeliveryState'] = _shipping_address["country_area"]
         udata = "&".join("%s=%s" % kv for kv in data.items())
         crypt = self.aes_enc(udata)
         return {'VPSProtocol': self._version, 'TxType': 'PAYMENT',

@@ -26,15 +26,6 @@ def alias_class(name):
         setattr(self, name, value)
     return property(setalias, getalias, delalias)
 
-class ParamDict(dict):
-    def __getattr__(self, key):
-        if key in self:
-            return self[key]
-        else:
-            return None
-    # ignore writes
-    def __setattr__(self, key, value):
-        pass
 
 def create_get_address(typename):
     """ create getter  """
