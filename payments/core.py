@@ -73,9 +73,7 @@ class BasicProvider(object):
         With ExternalPostNeeded the self.autosubmit attribute of a form is set (remove that later?)
         '''
         from .forms import PaymentForm
-        if not data:
-            data = {}
-        return PaymentForm(self.get_hidden_fields(payment).update(data),
+        return PaymentForm(self.get_hidden_fields(payment),
                            self.get_action(payment), self._method)
 
     def process_data(self, payment, request):
