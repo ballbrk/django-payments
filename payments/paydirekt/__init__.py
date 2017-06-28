@@ -159,7 +159,7 @@ class PaydirektProvider(BasicProvider):
             "city": shipping["city"],
             "countryCode": shipping["country_code"],
             "state": shipping["country_area"],
-            "emailAddress": shipping["billing_email"]
+            "emailAddress": payment.billing_email
         }
         #strip zeroes
         shipping = {k: v for k, v in shipping.items() if v}
