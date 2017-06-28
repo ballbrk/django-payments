@@ -19,6 +19,7 @@ import email.utils
 import hmac
 import simplejson as json
 import time
+import logging
 
 import requests
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
@@ -176,13 +177,15 @@ class PaydirektProvider(BasicProvider):
         try:
             results = json.loads(request.body, use_decimal=True)
         except (ValueError, TypeError):
+            logging.error("Payment failed because of unparseable object")
             return HttpResponseForbidden('FAILED')
         if not payment.transaction_id:
             payment.transaction_id = results["checkoutId"]
-            payment.attrs = results
+        logging.debug(str(results))
         if results["checkoutStatus"] == "APPROVED":
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
+                logging.debug("Payment succeeded")
             else:
                 payment.change_status(PaymentStatus.PREAUTH)
         else:
