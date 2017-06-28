@@ -40,7 +40,7 @@ def create_get_address(typename):
     country_code = "{}_country_code".format(typename)
     country_area = "{}_country_area".format(typename)
     def _get_address(self):
-        return ParamDict({
+        return {
             "first_name": getattr(self, first_name, None),
             "last_name": getattr(self, last_name, None),
             "address_1": getattr(self, address_1, None),
@@ -48,7 +48,7 @@ def create_get_address(typename):
             "city": getattr(self, city, None),
             "postcode": getattr(self, postcode, None),
             "country_code": getattr(self, country_code, None),
-            "country_area": getattr(self, country_area, None)})
+            "country_area": getattr(self, country_area, None)}
     return _get_address
 
 def add_address_to_class(typename):
