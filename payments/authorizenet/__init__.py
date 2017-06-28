@@ -30,7 +30,7 @@ class AuthorizeNetProvider(BasicProvider):
             'x_first_name': billing["first_name"],
             'x_last_name': billing["last_name"],
             'x_address': "%s, %s" % (billing["address_1"],
-                                     billing["address_2"],
+                                     billing["address_2"]),
             'x_city': billing["city"],
             'x_zip': billing["postcode"],
             'x_country': billing["country_area"]

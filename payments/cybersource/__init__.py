@@ -366,7 +366,7 @@ class CyberSourceProvider(BasicProvider):
         return card
 
     def _prepare_billing_data(self, payment):
-        _billing_addess = payment.get_billing_address()
+        _billing_address = payment.get_billing_address()
         billing = self.client.factory.create('data:BillTo')
         billing.firstName = _billing_address["first_name"]
         billing.lastName = _billing_address["last_name"]
