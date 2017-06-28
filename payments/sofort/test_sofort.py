@@ -5,7 +5,7 @@ import json
 
 from . import SofortProvider
 from .. import PaymentStatus, RedirectNeeded
-from ..meta import create_get_address
+from ..utils import create_get_address
 
 SECRET = 'abcd1234'
 CLIENT_ID = '1234'

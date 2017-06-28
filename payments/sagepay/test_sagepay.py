@@ -4,7 +4,7 @@ from mock import patch, MagicMock, Mock
 
 from . import SagepayProvider
 from .. import PaymentStatus
-from ..meta import create_get_address
+from ..utils import create_get_address
 
 VENDOR = 'abcd1234'
 ENCRYPTION_KEY = '1234abdd1234abcd'

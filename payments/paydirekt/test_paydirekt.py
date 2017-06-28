@@ -57,5 +57,5 @@ class TestPaydirektProvider(TestCase):
         request = MagicMock()
         request.json = lambda : PROCESS_DATA.copy()
         response = self.provider.process_data(self.payment, request)
-        self.assertEqual(self.payment.status, verification_status)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.payment.status, request.json)

@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from .core import provider_factory
-from .meta import add_address_to_class, create_get_address
+from .utils import add_address_to_class, create_get_address
 from . import FraudStatus, PaymentStatus
 
 
@@ -65,6 +65,9 @@ class AbstractBasePayment(object):
 
     def get_failure_url(self):
         raise NotImplementedError()
+
+    def get_rejection_url(self):
+        return self.get_failure_url()
 
     def get_success_url(self):
         raise NotImplementedError()

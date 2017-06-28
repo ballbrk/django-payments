@@ -28,6 +28,18 @@ from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 
 
+def check_response(response, response_json=None):
+    if response.status_code not in [200, 201]:
+        if response_json:
+            try:
+                error_code = response_json["messages"][0]["code"] if len(response_json["messages"]) > 0 else None
+                gateway_error = response_json.get("error_description", None)
+                raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
+            except KeyError:
+                raise PaymentError(str(response.status_code))
+        else:
+            raise PaymentError(str(response.status_code))
+
 # Capture: if False ORDER is used
 class PaydirektProvider(BasicProvider):
     '''
@@ -93,11 +105,8 @@ class PaydirektProvider(BasicProvider):
         }
         response = requests.post(self.path_token.format(self.endpoint), data=json.dumps(body, use_decimal=True), headers=header)
         token_raw = json.loads(response.text, use_decimal=True)
-        if response.status_code != 200:
-            self.token_raw = token_raw
-            error_code = token_raw["messages"][0]["code"] if len(token_raw["messages"]) > 0 else None
-            gateway_error = token_raw.get("error_description", None)
-            raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
+        check_response(response, token_raw)
+
         self.access_token = token_raw["access_token"]
         self.expires_in = date_now+timedelta(seconds=token_raw["expires_in"])
 
@@ -143,28 +152,29 @@ class PaydirektProvider(BasicProvider):
             "addresseeGivenName": shipping["first_name"],
             "addresseeLastName": shipping["last_name"],
             "company": shipping.get("company", None),
-            #"additionalAddressInformation": shipping.address_2,
+            #"additionalAddressInformation": shipping["address_2"],
             "street": shipping["address_1"],
             "streetNr": shipping["address_2"],
             "zip": shipping["postcode"],
             "city": shipping["city"],
-            "countryCode": shipping.country_code,
+            "countryCode": shipping["country_code"],
             "state": shipping["country_area"],
             "emailAddress": shipping["billing_email"]
         }
+        #strip zeroes
         shipping = {k: v for k, v in shipping.items() if v}
         body = {k: v for k, v in body.items() if v}
 
         body["shippingAddress"] = shipping
 
         response = requests.post(self.path_checkout.format(self.endpoint), data=json.dumps(body, use_decimal=True), headers=headers)
-        response.raise_for_status()
         json_response = json.loads(response.text, use_decimal=True)
+        check_response(response, json_response)
         raise RedirectNeeded(json_response["_links"]["approve"]["href"])
 
     def process_data(self, payment, request):
-        if request.status != 200:
-            return
+        if request.status not in [200,201]:
+            return HttpResponseForbidden('FAILED')
         try:
             results = json.loads(request.body, use_decimal=True)
         except (ValueError, TypeError):
@@ -181,15 +191,6 @@ class PaydirektProvider(BasicProvider):
         payment.save()
         return HttpResponse('OK')
 
-    def get_token_from_request(self, request):
-        if request.status != 200:
-            return None
-        try:
-            results = json.loads(request.body, use_decimal=True)
-        except (ValueError, TypeError):
-            return None
-        return results.get("checkoutId", None)
-
     def capture(self, payment, amount=None):
         if not amount:
             amount = payment.total
@@ -202,8 +203,8 @@ class PaydirektProvider(BasicProvider):
         }
         response = requests.post(self.path_capture.format(self.endpoint, payment.transaction_id), \
                                  data=json.dumps(body, use_decimal=True), headers=header)
-        response.raise_for_status()
         json_response = json.loads(response.text, use_decimal=True)
+        check_response(response, json_response)
         return json_response["amount"]
 
     def release(self, payment):
@@ -212,7 +213,8 @@ class PaydirektProvider(BasicProvider):
         header["Authorization"] = "Bearer %s" % self.access_token
         response = requests.post(self.path_release.format(self.endpoint, payment.transaction_id), \
                                  headers=header)
-        response.raise_for_status()
+        json_response = json.loads(response.text, use_decimal=True)
+        check_response(response, json_response)
 
     def refund(self, payment, amount=None):
         if not amount:
@@ -226,6 +228,6 @@ class PaydirektProvider(BasicProvider):
         }
         response = requests.post(self.path_refund.format(self.endpoint, payment.transaction_id), \
                                  data=json.dumps(body, use_decimal=True), headers=header)
-        response.raise_for_status()
         json_response = json.loads(response.text, use_decimal=True)
+        check_response(response, json_response)
         return json_response["amount"]
