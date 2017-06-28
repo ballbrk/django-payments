@@ -45,6 +45,11 @@ class FraudStatus:
 
 
 class RedirectNeeded(Exception):
+    """ GET redirect, message is url where to redirect """
+    pass
+
+class ExternalPostNeeded(Exception):
+    """ POST redirect, message is form to submit. """
     pass
 
 
@@ -55,9 +60,6 @@ class PaymentError(Exception):
         self.code = code
         self.gateway_message = gateway_message
 
-
-class ExternalPostNeeded(Exception):
-    pass
 
 
 def get_payment_model():

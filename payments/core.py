@@ -53,6 +53,7 @@ class BasicProvider(object):
         return self.get_return_url(payment)
 
     def __init__(self, capture=True):
+        """ capture: capture in checkout """
         self._capture = capture
 
     def get_hidden_fields(self, payment):
@@ -68,6 +69,8 @@ class BasicProvider(object):
     def get_form(self, payment, data=None):
         '''
         Converts *payment* into a form suitable for Django templates.
+        Can return NeedsRedirect, ExternalPostNeeded to indicate a get redirect or a post redirect.
+        With ExternalPostNeeded the self.autosubmit attribute of a form is set (remove that later?)
         '''
         from .forms import PaymentForm
         if not data:
@@ -88,7 +91,7 @@ class BasicProvider(object):
         raise NotImplementedError()
 
     def get_return_url(self, payment, extra_data=None):
-        """ Get url customer visits, triggering the transaction """
+        """ Get url customer visits, triggering the transaction => process_data """
         payment_link = payment.get_process_url()
         url = urljoin(get_base_url(), payment_link)
         if extra_data:
