@@ -179,6 +179,7 @@ class PaydirektProvider(BasicProvider):
             return HttpResponseForbidden('FAILED')
         if not payment.transaction_id:
             payment.transaction_id = results["checkoutId"]
+            payment.attrs = results
         if results["checkoutStatus"] == "APPROVED":
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
