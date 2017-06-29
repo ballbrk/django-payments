@@ -43,7 +43,7 @@ class AbstractBasePayment(object):
         self.status = status
         self.message = message
         self.save()
-        status_changed.send(sender=type(self), instance=self)
+        status_changed.send_robust(sender=type(self), instance=self)
 
     def change_fraud_status(self, status, message='', commit=True):
         available_statuses = [choice[0] for choice in FraudStatus.CHOICES]
