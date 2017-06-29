@@ -33,7 +33,7 @@ def check_response(response, response_json=None):
     if response.status_code not in [200, 201]:
         if response_json:
             try:
-                error_code = response_json["messages"][0]["code"] if len(response_json["messages"]) > 0 else None
+                error_code = response_json["messages"][0]["code"] if "messages" in response_json and len(response_json["messages"]) > 0 else None
                 gateway_error = response_json.get("error_description", None)
                 raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
             except KeyError:
@@ -185,7 +185,6 @@ class PaydirektProvider(BasicProvider):
         if results["checkoutStatus"] == "APPROVED":
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
-                logging.debug("Payment succeeded")
             else:
                 payment.change_status(PaymentStatus.PREAUTH)
         else:
