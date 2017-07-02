@@ -13,7 +13,7 @@ from .form import OrderForm
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 
-class DirectProvider(BasicProvider):
+class DirectPaymentProvider(BasicProvider):
     '''
         Payment is done manually e.g. cash on delivery
         Because of that there is no limitation and payments are confirmed without checks
