@@ -69,5 +69,5 @@ class CreditCardPaymentFormWithName(CreditCardPaymentForm):
         super(CreditCardPaymentFormWithName, self).__init__(*args, **kwargs)
         name_field = self.fields.pop('name')
         fields = OrderedDict({'name': name_field})
-        fields.update(self.fields)
+        fields.update(fields)
         self.fields = fields

@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpRespons
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+from .form import OrderForm
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 
@@ -18,12 +19,15 @@ class DirectProvider(BasicProvider):
         Because of that there is no limitation and payments are confirmed without checks
     '''
 
-    def __init__(self, **kwargs):
+    def __init__(self, extracosts=0, **kwargs):
+        self.extracosts = extracosts
         super(DirectProvider, self).__init__(**kwargs)
 
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
+        if not data:
+            return OrderForm({"orderid": payment.id, "extracosts": self.extracosts})
         raise RedirectNeeded(self.get_return_url(payment))
 
     def process_data(self, payment, request):
