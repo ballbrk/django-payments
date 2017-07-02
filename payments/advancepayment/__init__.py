@@ -8,6 +8,7 @@ import logging
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.conf import settings
 
+from .forms import IBANBankingForm
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 
@@ -24,13 +25,18 @@ class CashOnDeliveryProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
+        if not data:
+            return IBANBankingForm()
+        form = IBANBankingForm(data)
+        if not form.is_valid():
+            return form
+        payment.attrs.IBAN = form.cleaned_data["iban"]
+        payment.attrs.BIC = form.cleaned_data["bic"]
+        payment.save()
         raise RedirectNeeded(self.get_return_url(payment))
 
     def process_data(self, payment, request):
-        if self._capture:
-            payment.change_status(PaymentStatus.CONFIRMED)
-        else:
-            payment.change_status(PaymentStatus.PREAUTH)
+        payment.change_status(PaymentStatus.PREAUTH)
         return HttpResponseRedirect(payment.get_success_url())
 
     def capture(self, payment, amount=None):
@@ -39,7 +45,7 @@ class CashOnDeliveryProvider(BasicProvider):
         return amount
 
     def release(self, payment):
-        payment.change_status(PaymentStatus.CONFIRMED)
+        payment.change_status(PaymentStatus.PREAUTH)
 
     def refund(self, payment, amount=None):
         if not amount:

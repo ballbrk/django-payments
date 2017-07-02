@@ -7,6 +7,7 @@ import logging
 
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
