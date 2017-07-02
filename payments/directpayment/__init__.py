@@ -12,15 +12,14 @@ from django.core.exceptions import ImproperlyConfigured
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 
-# Capture: if False ORDER is used
-class CashOnDeliveryProvider(BasicProvider):
+class DirectProvider(BasicProvider):
     '''
-    nearly stub, because things are done manually
+        Payment is done manually e.g. cash on delivery
+        Because of that there is no limitation and payments are confirmed without checks
     '''
 
-    def __init__(self, overcapture=False, **kwargs):
-        self.overcapture = overcapture
-        super(PaydirektProvider, self).__init__(**kwargs)
+    def __init__(self, **kwargs):
+        super(DirectProvider, self).__init__(**kwargs)
 
     def get_form(self, payment, data=None):
         if not payment.id:

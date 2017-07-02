@@ -1,7 +1,9 @@
 
 from django import forms
-from localflavor.generic.forms import IBANFormField, BICFormField
+from django.forms import widgets
 
  class IBANBankingForm(forms.Form):
-     iban = IBANFormField()
-     bic = BICFormField()
+     # only shown, return is ignored
+     token = forms.Charfield(disabled=True)
+     iban = forms.Charfield(disabled=True)
+     bic = forms.Charfield(disabled=True)

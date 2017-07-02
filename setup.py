@@ -26,7 +26,6 @@ PACKAGES = [
 REQUIREMENTS = [
     'braintree>=3.14.0',
     'Django>=1.5',
-    'django-localflavor>=1.4',
     'cryptography>=1.1.0',
     'PyJWT>=1.3.0',
     'requests>=1.2.0',
