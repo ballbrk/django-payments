@@ -21,7 +21,7 @@ class DirectPaymentProvider(BasicProvider):
 
     def __init__(self, extracosts=0, **kwargs):
         self.extracosts = extracosts
-        super(DirectProvider, self).__init__(**kwargs)
+        super(DirectPaymentProvider, self).__init__(**kwargs)
 
     def get_form(self, payment, data=None):
         if not payment.id:
