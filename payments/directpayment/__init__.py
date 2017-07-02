@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpRespons
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from .form import OrderForm
+from .forms import OrderForm
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 
