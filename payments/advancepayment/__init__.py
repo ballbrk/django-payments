@@ -23,8 +23,8 @@ class AdvancePaymentProvider(BasicProvider):
     def __init__(self, iban, bic, **kwargs):
         if len(iban) <= 10 or len(bic) != 11:
             raise ImproperlyConfigured("Wrong iban or bic")
-        self.iban=iban
-        self.bic=bic
+        self.iban=iban.upper()
+        self.bic=bic.upper()
         super(AdvancePaymentProvider, self).__init__(**kwargs)
 
     def initialize_form(self):
