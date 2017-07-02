@@ -8,6 +8,7 @@ import logging
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.template import Template
 
 from .forms import IBANBankingForm
 from .. import PaymentError, PaymentStatus, RedirectNeeded
@@ -16,7 +17,7 @@ from ..core import BasicProvider
 class AdvancePaymentProvider(BasicProvider):
     '''
         banking software or user confirms transaction (with token).
-        The user gets only the id, the seller can confirm with the token
+        The user gets only the id, the seller can confirm with the token.
         The form is only needed to show the user the data
     '''
 
@@ -46,7 +47,7 @@ class AdvancePaymentProvider(BasicProvider):
 
     def process_data(self, payment, request):
         payment.change_status(PaymentStatus.CONFIRMED)
-        return HttpResponseRedirect()
+        return Template("payments/advancepayment/confirmation.html").render({'payment': self.payment})
 
     def capture(self, payment, amount=None):
         if not amount:

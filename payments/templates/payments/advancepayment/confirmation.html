@@ -1,0 +1,14 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% trans 'Confirmed Order'%}</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    </head>
+
+    <body>
+      {% blocktrans trimmed %}
+        The order with the id: {{ payment.id }} is now confirmed.
+      {% endblocktrans %}
+    </body>
+</html>
