@@ -44,7 +44,7 @@ def check_response(response, response_json=None):
 # Capture: if False ORDER is used
 class PaydirektProvider(BasicProvider):
     '''
-    paydirekt payment provider
+    Giropay Paydirekt payment provider
 
     api_key:
         seller key, assigned by paydirekt
@@ -53,38 +53,31 @@ class PaydirektProvider(BasicProvider):
     endpoint:
         which endpoint to use
     '''
-    access_token = None
-    expires_in = None
+    checkout_field_order = ["merchantId", "projectId", "merchantTxId", "amount", "currency", "purpose", "type", "shoppingCartType", "CustomerId", "shippingAmount", "shippingAddresseFirstName",\
+    "shippingAddresseLastName", "shippingCompany", "shippingAdditionalAddressInformation", "shippingStreet", "shippingStreetNumber", "shippingZipCode", "shippingCity", "shippingCountry", "shippingEmail",  "merchantReconciliationReferenceNumber", "orderAmount", "orderId", "cart", "invoiceId", "customerMail", "minimumAge", "urlRedirect", "urlNotify"]
+    path_checkout = "{}/girocheckout/api/v2/transaction/start"
+    path_capture = "{}/girocheckout/api/v2/transaction/capture"
+    path_refund = "{}/girocheckout/api/v2/transaction/refund"
 
-    path_token = "{}/api/merchantintegration/v1/token/obtain"
-    path_checkout = "{}/api/checkout/v1/checkouts"
-    path_capture = "{}/api/checkout/v1/checkouts/{}/captures"
-    path_close = "{}/api/checkout/v1/checkouts/{}/close"
-    path_refund = "{}/api/checkout/v1/checkouts/{}/refunds"
-
-
-    translate_status = {
-        "APPROVED": PaymentStatus.CONFIRMED,
-        "OPEN": PaymentStatus.PREAUTH,
-        "PENDING": PaymentStatus.WAITING,
-        "REJECTED": PaymentStatus.REJECTED,
-        "CANCELED": PaymentStatus.ERROR,
-        "CLOSED": PaymentStatus.CONFIRMED,
-        "EXPIRED": PaymentStatus.ERROR,
-    }
     header_default = {
         "Content-Type": "application/hal+json;charset=utf-8",
     }
 
-
-    def __init__(self, api_key, secret, endpoint="https://api.sandbox.paydirekt.de", \
-                 overcapture=False, **kwargs):
-        if not isinstance(secret, bytes):
-            self.secret_b64 = secret.encode('utf-8')
-        self.api_key = api_key
+    # DANGER: there is no playground url
+    def __init__(self, merchantId, projectId, secret, endpoint="https://payment.girosolution.de", \
+                 **kwargs):
+        self.merchantId = merchantId
+        self.projectId = projectId
+        self.secret = secret
         self.endpoint = endpoint
-        self.overcapture = overcapture
         super(PaydirektProvider, self).__init__(**kwargs)
+        if not self._capture:
+            raise ImproperlyConfigured(
+                'Giropay paydirekt does not support pre-authorization.')
+
+    def generate_hash(self, dictob):
+        outarray = [for dictob.get(i) in checkout_field_order]
+        string = "".join(lambda x: outarray)
 
     def retrieve_oauth_token(self):
         """ Retrieves oauth Token and save it as instance variable """

@@ -252,7 +252,7 @@ class PaypalProvider(BasicProvider):
             'total': str(amount.quantize(
                 CENTS, rounding=ROUND_HALF_UP))}
 
-    def capture(self, payment, amount=None):
+    def capture(self, payment, amount=None, final=False):
         if amount is None:
             amount = payment.total
         amount_data = self.get_amount_data(payment, amount)

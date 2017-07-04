@@ -20,6 +20,10 @@ class CashOnDeliveryProvider(BasicProvider):
     def __init__(self, overcapture=False, **kwargs):
         self.overcapture = overcapture
         super(PaydirektProvider, self).__init__(**kwargs)
+        if not self._capture:
+            raise ImproperlyConfigured(
+                'advance payment does not support pre-authorization.')
+
 
     def get_form(self, payment, data=None):
         if not payment.id:
@@ -27,19 +31,8 @@ class CashOnDeliveryProvider(BasicProvider):
         raise RedirectNeeded(self.get_return_url(payment))
 
     def process_data(self, payment, request):
-        if self._capture:
-            payment.change_status(PaymentStatus.CONFIRMED)
-        else:
-            payment.change_status(PaymentStatus.PREAUTH)
-        return HttpResponseRedirect(payment.get_success_url())
-
-    def capture(self, payment, amount=None):
-        if not amount:
-            amount = payment.total
-        return amount
-
-    def release(self, payment):
         payment.change_status(PaymentStatus.CONFIRMED)
+        return HttpResponseRedirect(payment.get_success_url())
 
     def refund(self, payment, amount=None):
         if not amount:

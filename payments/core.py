@@ -98,12 +98,12 @@ class BasicProvider(object):
             return url + '?' + qs
         return url
 
-    def capture(self, payment, amount=None):
+    def capture(self, payment, amount=None, final=False):
         ''' Capture a fraction of the total amount of a payment. Return amount captured '''
         raise NotImplementedError()
 
     def release(self, payment):
-        ''' Complete payment '''
+        ''' Refund/annilates whole payment, returns nothing '''
         raise NotImplementedError()
 
     def refund(self, payment, amount=None):
