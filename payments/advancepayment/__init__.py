@@ -27,6 +27,9 @@ class AdvancePaymentProvider(BasicProvider):
         self.iban=iban.upper()
         self.bic=bic.upper()
         super(AdvancePaymentProvider, self).__init__(**kwargs)
+        if not self._capture:
+            raise ImproperlyConfigured(
+                'Coinbase does not support pre-authorization.')
 
     def initialize_form(self):
         return {
@@ -37,7 +40,7 @@ class AdvancePaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
-        if not data:
+        if not data or not data.get("iban"):
             return IBANBankingForm(self.initialize_form().update({"orderid": payment.id}))
         if self._capture:
             payment.change_status(PaymentStatus.WAITING)
@@ -48,15 +51,6 @@ class AdvancePaymentProvider(BasicProvider):
     def process_data(self, payment, request):
         payment.change_status(PaymentStatus.CONFIRMED)
         return Template("payments/advancepayment/confirmation.html").render({'payment': self.payment})
-
-    def capture(self, payment, amount=None):
-        if not amount:
-            amount = payment.total
-        return amount
-
-    def release(self, payment):
-        if payment.status == PaymentStatus.PREAUTH:
-            payment.change_status(PaymentStatus.WAITING)
 
     def refund(self, payment, amount=None):
         if not amount:
