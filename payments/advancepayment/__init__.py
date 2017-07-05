@@ -31,17 +31,18 @@ class AdvancePaymentProvider(BasicProvider):
             raise ImproperlyConfigured(
                 'Coinbase does not support pre-authorization.')
 
-    def initialize_form(self):
+    def initialize_form(self, paymentid):
         return {
             'iban': self.iban,
-            'bic': self.bic
+            'bic': self.bic,
+            'orderid': paymentid
         }
 
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
         if not data or not data.get("iban"):
-            return IBANBankingForm(self.initialize_form().update({"orderid": payment.id}))
+            return IBANBankingForm(self.initialize_form(payment.id), payment, self)
         if self._capture:
             payment.change_status(PaymentStatus.WAITING)
         else:

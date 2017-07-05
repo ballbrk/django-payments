@@ -30,7 +30,7 @@ class DirectPaymentProvider(BasicProvider):
         if not payment.id:
             payment.save()
         if not data:
-            return OrderForm({"orderid": payment.id, "extracosts": self.extracosts})
+            return OrderForm({"orderid": payment.id, "extracosts": self.extracosts}, payment, self)
         raise RedirectNeeded(self.get_return_url(payment))
 
     def process_data(self, payment, request):
