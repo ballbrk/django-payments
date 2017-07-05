@@ -44,7 +44,7 @@ class AdvancePaymentProvider(BasicProvider):
         if not data or not data.get("iban"):
             return IBANBankingForm(self.initialize_form(payment.id), payment, self)
         if self._capture:
-            payment.change_status(PaymentStatus.WAITING)
+            payment.change_status(PaymentStatus.CONFIRMED)
         else:
             payment.change_status(PaymentStatus.PREAUTH)
         raise RedirectNeeded(payment.get_success_url())
