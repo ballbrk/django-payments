@@ -29,17 +29,18 @@ from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 
 
-def check_response(response, response_json=None):
-    if response.status_code not in [200, 201]:
+def check_response(response, response_json):
+    if response.status_code not in [200, 201] or response_json["rc"] != 4000:
         if response_json:
             try:
-                error_code = response_json["messages"][0]["code"] if "messages" in response_json and len(response_json["messages"]) > 0 else None
-                gateway_error = response_json.get("error_description", None)
+                error_code = response_json["rc"]
+                gateway_error = response_json["msg"]
                 raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
             except KeyError:
                 raise PaymentError(str(response.status_code))
         else:
             raise PaymentError(str(response.status_code))
+
 
 # Capture: if False ORDER is used
 class PaydirektProvider(BasicProvider):
@@ -55,116 +56,77 @@ class PaydirektProvider(BasicProvider):
     '''
     checkout_field_order = ["merchantId", "projectId", "merchantTxId", "amount", "currency", "purpose", "type", "shoppingCartType", "CustomerId", "shippingAmount", "shippingAddresseFirstName",\
     "shippingAddresseLastName", "shippingCompany", "shippingAdditionalAddressInformation", "shippingStreet", "shippingStreetNumber", "shippingZipCode", "shippingCity", "shippingCountry", "shippingEmail",  "merchantReconciliationReferenceNumber", "orderAmount", "orderId", "cart", "invoiceId", "customerMail", "minimumAge", "urlRedirect", "urlNotify"]
+
+    #  capture/refund
+    cr_field_order = ["merchantId", "projectId", "merchantTxId", "amount", "currency", "purpose", "reference", "merchantReconciliationReferenceNumber", "final"]
     path_checkout = "{}/girocheckout/api/v2/transaction/start"
     path_capture = "{}/girocheckout/api/v2/transaction/capture"
     path_refund = "{}/girocheckout/api/v2/transaction/refund"
 
-    header_default = {
-        "Content-Type": "application/hal+json;charset=utf-8",
-    }
+    endpoint = "https://payment.girosolution.de"
 
-    # DANGER: there is no playground url
-    def __init__(self, merchantId, projectId, secret, endpoint="https://payment.girosolution.de", \
-                 **kwargs):
+    # DANGER: there is no playground url, check if Project has test status
+    def __init__(self, merchantId, projectId, secret, overcapture=False, **kwargs):
         self.merchantId = merchantId
         self.projectId = projectId
         self.secret = secret
         self.endpoint = endpoint
+        self.overcapture = overcapture
         super(PaydirektProvider, self).__init__(**kwargs)
         if not self._capture:
             raise ImproperlyConfigured(
                 'Giropay paydirekt does not support pre-authorization.')
 
-    def generate_hash(self, dictob):
-        outarray = [for dictob.get(i) in checkout_field_order]
-        string = "".join(lambda x: outarray)
-
-    def retrieve_oauth_token(self):
-        """ Retrieves oauth Token and save it as instance variable """
-        token_uuid = str(uuid.uuid4()).encode("utf-8")
-        nonce = urlsafe_b64encode(os.urandom(48))
-        date_now = datetime.now(timezone.utc)
-        bytessign = token_uuid+b":"+date_now.strftime("%Y%m%d%H%M%S").encode('utf-8')+b":"+self.api_key.encode('utf-8')+b":"+nonce
-        h_temp = hmac.new(urlsafe_b64decode(self.secret_b64), msg=bytessign, digestmod='sha256')
-
-        header = PaydirektProvider.header_default.copy()
-        header["X-Auth-Key"] = self.api_key
-        header["X-Request-ID"] = token_uuid
-
-        header["X-Auth-Code"] = str(urlsafe_b64encode(h_temp.digest()), 'ascii')
-        header["Date"] = email.utils.format_datetime(date_now, usegmt=True)
-        body = {
-            "grantType" : "api_key",
-            "randomNonce" : str(nonce, "ascii")
-        }
-        response = requests.post(self.path_token.format(self.endpoint), data=json.dumps(body, use_decimal=True), headers=header)
-        token_raw = json.loads(response.text, use_decimal=True)
-        check_response(response, token_raw)
-
-        self.access_token = token_raw["access_token"]
-        self.expires_in = date_now+timedelta(seconds=token_raw["expires_in"])
-
-    def check_and_update_token(self):
-        """ Check if token exists or has expired, renew it in this case """
-        if not self.expires_in or self.expires_in >= datetime.now(timezone.utc):
-            self.retrieve_oauth_token()
+    def auth_for_dict(self, dictob, order):
+        hmacob = hmac.new(self.secret, digestmod="md5")
+        dictob["merchantId"] = self.merchantId
+        dictob["projectId"] = self.projectId
+        for field in order:
+            if dictob.get(field, None):
+                hmacob.update(str(dictob.get(field)).encode("utf8"))
+        dictob["hash"] = hmacob.hexdigest()
+        return dictob
 
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
-        self.check_and_update_token()
-        headers = PaydirektProvider.header_default.copy()
-        headers["Authorization"] = "Bearer %s" % self.access_token
         # email_hash = sha256(payment.billing_email.encode("utf-8")).digest())
+        shipping = payment.get_shipping_address()
+        # TODO: seems streetnr is in address_1
         body = {
             "type": "ORDER" if not self._capture else "DIRECT_SALE",
-            "totalAmount": payment.total,
-            "shippingAmount": payment.delivery,
-            "orderAmount": payment.total - payment.delivery,
+            "amount": int(payment.total*100),
+            "shippingAmount": int(payment.delivery*100),
             "currency": payment.currency,
+            "shippingAddresseeGivenName": shipping["first_name"],
+            "shippingAddresseeLastName": shipping["last_name"],
+            "shippingCompany": shipping.get("company", None),
+            #"additionalAddressInformation": shipping["address_2"],
+            "shippingStreet": shipping["address_1"],
+            "shippingStreetNumber": shipping["address_2"],
+            "shippingZipCode": shipping["postcode"],
+            "shippingCity": shipping["city"],
+            "shippingCountry": shipping["country_code"],
+            "shippingEmail": payment.billing_email
             #"items": getattr(payment, "items", None),
             #"shoppingCartType": getattr(payment, "carttype", None),
             #"deliveryType": getattr(payment, "deliverytype", None),
             # payment id can repeat if different shop systems are used
-            "merchantOrderReferenceNumber": "%s:%s" % (hex(int(time.time())), payment.id),
-            "redirectUrlAfterSuccess": payment.get_success_url(),
-            "redirectUrlAfterCancellation": payment.get_failure_url(),
-            "redirectUrlAfterRejection": payment.get_failure_url(),
-            "callbackUrlStatusUpdates": self.get_return_url(payment),
-            #"sha256hashedEmailAddress": str(urlsafe_b64encode(email_hash), 'ascii'),
+            "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "urlRedirect": payment.get_success_url(),
+            "urlNotify": self.get_return_url(payment),
             "minimumAge": getattr(payment, "minimumage", None),
-            "redirectUrlAfterAgeVerificationFailure": payment.get_failure_url(),
-            #"note": payment.message[0:37]
-
         }
         if self.overcapture and body["type"] == "ORDER":
             body["overcapture"] = True
 
-        shipping = payment.get_shipping_address()
-
-        shipping = {
-            "addresseeGivenName": shipping["first_name"],
-            "addresseeLastName": shipping["last_name"],
-            "company": shipping.get("company", None),
-            #"additionalAddressInformation": shipping["address_2"],
-            "street": shipping["address_1"],
-            "streetNr": shipping["address_2"],
-            "zip": shipping["postcode"],
-            "city": shipping["city"],
-            "countryCode": shipping["country_code"],
-            "state": shipping["country_area"],
-            "emailAddress": payment.billing_email
-        }
-        #strip zeroes
-        shipping = {k: v for k, v in shipping.items() if v}
         body = {k: v for k, v in body.items() if v}
+        self.auth_for_dict(body, self.checkout_field_order)
 
-        body["shippingAddress"] = shipping
-
-        response = requests.post(self.path_checkout.format(self.endpoint), data=json.dumps(body, use_decimal=True), headers=headers)
-        json_response = json.loads(response.text, use_decimal=True)
+        response = requests.post(self.path_checkout.format(self.endpoint), data=body)
+        json_response = json.loads(response.text)
         check_response(response, json_response)
-        raise RedirectNeeded(json_response["_links"]["approve"]["href"])
+        raise RedirectNeeded(json_response["redirect"])
 
     def process_data(self, payment, request):
         try:
@@ -173,52 +135,50 @@ class PaydirektProvider(BasicProvider):
             logging.error("Payment failed because of unparseable object")
             return HttpResponseForbidden('FAILED')
         if not payment.transaction_id:
-            payment.transaction_id = results["checkoutId"]
-        logging.debug(str(results))
-        if results["checkoutStatus"] == "APPROVED":
+            payment.transaction_id = results["gcBackendTxId"]
+        if results["gcResultPayment"] == "APPROVED":
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
             else:
                 payment.change_status(PaymentStatus.PREAUTH)
         else:
-            payment.change_status(self.translate_status[results["checkoutStatus"]])
-        payment.save()
+            payment.change_status(PaymentStatus.ERROR)
         return HttpResponse('OK')
 
     def capture(self, payment, amount=None, final=False):
         if not amount:
             amount = payment.total
-        self.check_and_update_token()
-        header = PaydirektProvider.header_default.copy()
-        header["Authorization"] = "Bearer %s" % self.access_token
         body = {
-            "amount": amount,
+            "amount": int(amount*100),
+            "currency": self.currency,
             "finalCapture": final,
-            "callbackUrlStatusUpdates": self.get_return_url(payment)
+            "purpose": "capture",
+            "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "reference": payment.transaction_id,
+            "final": final
         }
-        response = requests.post(self.path_capture.format(self.endpoint, payment.transaction_id), \
-                                 data=json.dumps(body, use_decimal=True), headers=header)
+        self.auth_for_dict(body, self.rc_field_order)
+        response = requests.post(self.path_capture.format(self.endpoint), \
+                                 data=body)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
-        if final:
-            response = requests.post(self.path_close.format(self.endpoint, payment.transaction_id), \
-                                     headers=header)
-            json_response = json.loads(response.text, use_decimal=True)
-            check_response(response, json_response)
-        return json_response["amount"]
+        return decimal.Decimal("{}.{}".format(divmod(json_response["amount"], 100)))
 
     def refund(self, payment, amount=None):
         if not amount:
             amount = payment.total
-        self.check_and_update_token()
-        header = PaydirektProvider.header_default.copy()
-        header["Authorization"] = "Bearer %s" % self.access_token
         body = {
-            "amount": amount,
-            "callbackUrlStatusUpdates": self.get_return_url(payment)
+            "amount": int(amount*100),
+            "currency": self.currency,
+            "finalCapture": final,
+            "purpose": "capture",
+            "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "reference": payment.transaction_id,
+            "final": final
         }
-        response = requests.post(self.path_refund.format(self.endpoint, payment.transaction_id), \
-                                 data=json.dumps(body, use_decimal=True), headers=header)
+        self.auth_for_dict(body, self.rc_field_order)
+        response = requests.post(self.path_capture.format(self.endpoint), \
+                                 data=body)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
-        return json_response["amount"]
+        return decimal.Decimal("{}.{}".format(divmod(json_response["amount"], 100)))
