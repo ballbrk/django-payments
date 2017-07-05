@@ -19,18 +19,12 @@ class DirectPaymentProvider(BasicProvider):
         Because of that there is no limitation and payments are confirmed without checks
     '''
 
-<<<<<<< HEAD:payments/cashondelivery/__init__.py
     def __init__(self, overcapture=False, **kwargs):
         self.overcapture = overcapture
         super(PaydirektProvider, self).__init__(**kwargs)
         if not self._capture:
             raise ImproperlyConfigured(
                 'advance payment does not support pre-authorization.')
-=======
-    def __init__(self, extracosts=0, **kwargs):
-        self.extracosts = extracosts
-        super(DirectPaymentProvider, self).__init__(**kwargs)
->>>>>>> 4cac760e034f12e189e6e9287a409226813916f7:payments/directpayment/__init__.py
 
     def get_form(self, payment, data=None):
         if not payment.id:
