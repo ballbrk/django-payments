@@ -19,9 +19,8 @@ class DirectPaymentProvider(BasicProvider):
         Because of that there is no limitation and payments are confirmed without checks
     '''
 
-    def __init__(self, overcapture=False, **kwargs):
-        self.overcapture = overcapture
-        super(PaydirektProvider, self).__init__(**kwargs)
+    def __init__(self, **kwargs):
+        super(DirectPaymentProvider, self).__init__(**kwargs)
         if not self._capture:
             raise ImproperlyConfigured(
                 'advance payment does not support pre-authorization.')
@@ -29,13 +28,8 @@ class DirectPaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
-        if not data:
-            return OrderForm({"orderid": payment.id, "extracosts": self.extracosts}, payment, self)
-        raise RedirectNeeded(self.get_return_url(payment))
-
-    def process_data(self, payment, request):
         payment.change_status(PaymentStatus.CONFIRMED)
-        return HttpResponseRedirect(payment.get_success_url())
+        raise RedirectNeeded(payment.get_success_url())
 
     def refund(self, payment, amount=None):
         if not amount:

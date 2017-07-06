@@ -43,15 +43,9 @@ class AdvancePaymentProvider(BasicProvider):
             payment.save()
         if not data or not data.get("iban"):
             return IBANBankingForm(self.initialize_form(payment.id), payment, self)
-        if self._capture:
-            payment.change_status(PaymentStatus.CONFIRMED)
-        else:
-            payment.change_status(PaymentStatus.PREAUTH)
+        payment.change_status(PaymentStatus.CONFIRMED)
         raise RedirectNeeded(payment.get_success_url())
 
-    def process_data(self, payment, request):
-        payment.change_status(PaymentStatus.CONFIRMED)
-        return Template("payments/advancepayment/confirmation.html").render({'payment': self.payment})
 
     def refund(self, payment, amount=None):
         if not amount:

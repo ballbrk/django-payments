@@ -6,7 +6,7 @@ class IBANBankingForm(forms.Form):
     orderid = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
     iban = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
     bic = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
-    method="POST"
+    method="post"
 
     def __init__(self, instance, payment, provider, *args, **kwargs):
         super(IBANBankingForm, self).__init__(instance, *args, **kwargs)
