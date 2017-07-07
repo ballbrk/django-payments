@@ -42,6 +42,7 @@ class AbstractBasePayment(object):
         from .signals import status_changed
         self.status = status
         self.message = message
+
         self.save()
         status_changed.send_robust(sender=type(self), instance=self)
 
