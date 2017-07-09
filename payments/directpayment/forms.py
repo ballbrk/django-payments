@@ -5,7 +5,6 @@ class OrderIdForm(forms.Form):
     # only shown, return is ignored
     orderid = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
     method = "post"
-    # unique: redirection to same webpage
     action = ""
 
     def __init__(self, instance, payment, provider, *args, **kwargs):
