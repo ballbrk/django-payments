@@ -41,11 +41,10 @@ class AdvancePaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
-        if not data or not data.get("iban"):
+        if not data or not data.get("orderid", None):
             return IBANBankingForm(self.initialize_form(payment.id), payment, self)
         payment.change_status(PaymentStatus.CONFIRMED)
         raise RedirectNeeded(payment.get_success_url())
-
 
     def refund(self, payment, amount=None):
         if not amount:
