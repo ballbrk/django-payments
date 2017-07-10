@@ -20,10 +20,12 @@ import hmac
 import simplejson as json
 import time
 import logging
+import decimal
 
 import requests
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
@@ -70,7 +72,6 @@ class PaydirektProvider(BasicProvider):
         self.merchantId = merchantId
         self.projectId = projectId
         self.secret = secret
-        self.endpoint = endpoint
         self.overcapture = overcapture
         super(PaydirektProvider, self).__init__(**kwargs)
         if not self._capture:
@@ -107,7 +108,7 @@ class PaydirektProvider(BasicProvider):
             "shippingZipCode": shipping["postcode"],
             "shippingCity": shipping["city"],
             "shippingCountry": shipping["country_code"],
-            "shippingEmail": payment.billing_email
+            "shippingEmail": payment.billing_email,
             #"items": getattr(payment, "items", None),
             #"shoppingCartType": getattr(payment, "carttype", None),
             #"deliveryType": getattr(payment, "deliverytype", None),
@@ -150,35 +151,32 @@ class PaydirektProvider(BasicProvider):
             amount = payment.total
         body = {
             "amount": int(amount*100),
-            "currency": self.currency,
-            "finalCapture": final,
+            "currency": payment.currency,
             "purpose": "capture",
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
             "reference": payment.transaction_id,
             "final": final
         }
-        self.auth_for_dict(body, self.rc_field_order)
+        self.auth_for_dict(body, self.cr_field_order)
         response = requests.post(self.path_capture.format(self.endpoint), \
                                  data=body)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
-        return decimal.Decimal("{}.{}".format(divmod(json_response["amount"], 100)))
+        return decimal.Decimal("{}.{}".format(*divmod(json_response["amount"], 100)))
 
     def refund(self, payment, amount=None):
         if not amount:
             amount = payment.total
         body = {
             "amount": int(amount*100),
-            "currency": self.currency,
-            "finalCapture": final,
+            "currency": payment.currency,
             "purpose": "capture",
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
-            "reference": payment.transaction_id,
-            "final": final
+            "reference": payment.transaction_id
         }
-        self.auth_for_dict(body, self.rc_field_order)
+        self.auth_for_dict(body, self.cr_field_order)
         response = requests.post(self.path_capture.format(self.endpoint), \
                                  data=body)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
-        return decimal.Decimal("{}.{}".format(divmod(json_response["amount"], 100)))
+        return decimal.Decimal("{}.{}".format(*divmod(json_response["amount"], 100)))
