@@ -29,18 +29,14 @@ from django.core.exceptions import ImproperlyConfigured
 
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
+from ..utils import extract_streetnr
 
 
 def check_response(response, response_json):
     if response.status_code not in [200, 201] or response_json["rc"] != 4000:
-        logging.error(str(response_json))
-        if response_json:
-            error_code = response_json.get("rc", None)
-            gateway_error = response_json.get("msg", None)
-            raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
-        else:
-            raise PaymentError(str(response.status_code))
-
+        error_code = response_json.get("rc", None)
+        gateway_error = response_json.get("msg", None)
+        raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
 
 # Capture: if False ORDER is used
 class PaydirektProvider(BasicProvider):
@@ -66,10 +62,11 @@ class PaydirektProvider(BasicProvider):
     endpoint = "https://payment.girosolution.de"
 
     # DANGER: there is no playground url, check if Project has test status
-    def __init__(self, merchantId, projectId, secret, overcapture=False, **kwargs):
+    def __init__(self, merchantId, projectId, secret, default_cart_type="PHYSICAL", overcapture=False, **kwargs):
         self.merchantId = merchantId
         self.projectId = projectId
         self.secret = secret
+        self.default_cart_type = default_cart_type
         self.overcapture = overcapture
         super(PaydirektProvider, self).__init__(**kwargs)
         if not self._capture:
@@ -91,27 +88,26 @@ class PaydirektProvider(BasicProvider):
             payment.save()
         # email_hash = sha256(payment.billing_email.encode("utf-8")).digest())
         shipping = payment.get_shipping_address()
-        # TODO: seems streetnr is in address_1
         body = {
-            "type": "ORDER" if not self._capture else "DIRECT_SALE",
+            "type":  "SALE" if self._capture else "AUTH",
             "amount": int(payment.total*100),
             "shippingAmount": int(payment.delivery*100),
             "currency": payment.currency,
             "shippingAddresseeGivenName": shipping["first_name"],
             "shippingAddresseeLastName": shipping["last_name"],
             "shippingCompany": shipping.get("company", None),
-            #"additionalAddressInformation": shipping["address_2"],
+            "additionalAddressInformation": shipping["address_2"],
             "shippingStreet": shipping["address_1"],
-            "shippingStreetNumber": shipping["address_2"],
+            "shippingStreetNumber": extract_streetnr(shipping["address_1"], "0"),
             "shippingZipCode": shipping["postcode"],
             "shippingCity": shipping["city"],
             "shippingCountry": shipping["country_code"],
             "shippingEmail": payment.billing_email,
             #"items": getattr(payment, "items", None),
-            #"shoppingCartType": getattr(payment, "carttype", None),
-            #"deliveryType": getattr(payment, "deliverytype", None),
+            "shoppingCartType": getattr(payment, "carttype", self.default_cart_type),
             # payment id can repeat if different shop systems are used
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "orderId": str(payment.id),
             "urlRedirect": payment.get_success_url(),
             "urlNotify": self.get_return_url(payment),
             "minimumAge": getattr(payment, "minimumage", None),

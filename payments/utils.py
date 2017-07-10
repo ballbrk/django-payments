@@ -1,6 +1,8 @@
 from datetime import date
+import re
 
 from django.utils.translation import ugettext_lazy as _
+from django.db import models
 
 
 def get_month_choices():
@@ -13,9 +15,14 @@ def get_year_choices():
         date.today().year, date.today().year + 15)]
     return [('', _('Year'))] + year_choices
 
-
-
-from django.db import models
+_extract_streetnr = re.compile(r"([0-9]+)\s*$")
+def extract_streetnr(address, fallback=None):
+    # fallback should be string
+    ret = _extract_streetnr.findall(address)
+    if ret:
+        return ret[0]
+    else:
+        return fallback
 
 def alias_class(name):
     def getalias(self):

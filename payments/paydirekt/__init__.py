@@ -27,6 +27,7 @@ from django.conf import settings
 
 from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
+from ..utils import extract_streetnr
 
 
 def check_response(response, response_json=None):
@@ -155,7 +156,7 @@ class PaydirektProvider(BasicProvider):
             "company": shipping.get("company", None),
             #"additionalAddressInformation": shipping["address_2"],
             "street": shipping["address_1"],
-            "streetNr": shipping["address_2"],
+            "streetNr": extract_streetnr(shipping["address_1"], "0"),
             "zip": shipping["postcode"],
             "city": shipping["city"],
             "countryCode": shipping["country_code"],
