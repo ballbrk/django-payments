@@ -79,7 +79,7 @@ class PaydirektProvider(BasicProvider):
                 'Giropay paydirekt does not support pre-authorization.')
 
     def auth_for_dict(self, dictob, order):
-        hmacob = hmac.new(self.secret, digestmod="md5")
+        hmacob = hmac.new(self.secret.encode("utf8"), digestmod="md5")
         dictob["merchantId"] = self.merchantId
         dictob["projectId"] = self.projectId
         for field in order:
