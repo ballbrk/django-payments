@@ -34,12 +34,9 @@ from ..core import BasicProvider
 def check_response(response, response_json):
     if response.status_code not in [200, 201] or response_json["rc"] != 4000:
         if response_json:
-            try:
-                error_code = response_json["rc"]
-                gateway_error = response_json["msg"]
-                raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
-            except KeyError:
-                raise PaymentError(str(response.status_code))
+            error_code = response_json.get("rc", None)
+            gateway_error = response_json.get("msg", None)
+            raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
         else:
             raise PaymentError(str(response.status_code))
 
