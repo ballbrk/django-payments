@@ -33,7 +33,7 @@ from ..utils import extract_streetnr
 
 
 def check_response(response, response_json):
-    if response.status_code not in [200, 201] or response_json["rc"] != 4000:
+    if response.status_code not in [200, 201] or response_json["rc"] != 0:
         error_code = response_json.get("rc", None)
         gateway_error = response_json.get("msg", None)
         logging.error(str(response_json))
