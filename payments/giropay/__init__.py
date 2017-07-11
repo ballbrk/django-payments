@@ -95,8 +95,6 @@ class PaydirektProvider(BasicProvider):
             "shippingAmount": int(payment.delivery*100),
             "currency": payment.currency,
             "purpose", "{}-{}".format(payment.variant[:18], payment.id)
-            "shippingAddresseeGivenName": shipping["first_name"],
-            "shippingAddresseeLastName": shipping["last_name"],
             "shippingCompany": shipping.get("company", None),
             "additionalAddressInformation": shipping["address_2"],
             "shippingStreet": shipping["address_1"],
@@ -109,6 +107,8 @@ class PaydirektProvider(BasicProvider):
             "shoppingCartType": getattr(payment, "carttype", self.default_cart_type),
             # payment id can repeat if different shop systems are used
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "shippingAddresseFirstName": shipping["first_name"],
+            "shippingAddresseLastName": shipping["last_name"],
             "orderId": str(payment.id),
             "urlRedirect": payment.get_success_url(),
             "urlNotify": self.get_return_url(payment),
