@@ -93,7 +93,7 @@ class PaydirektProvider(BasicProvider):
             "type":  "SALE" if self._capture else "AUTH",
             "amount": int(payment.total*100),
             "currency": payment.currency,
-            "purpose", "{}-{}".format(payment.variant[:18], payment.id),
+            "purpose": "{}-{}".format(payment.variant[:18], payment.id),
             "shippingAmount": int(payment.delivery*100),
             "shippingAddresseFirstName": shipping["first_name"],
             "shippingAddresseLastName": shipping["last_name"],
