@@ -94,6 +94,7 @@ class PaydirektProvider(BasicProvider):
             "amount": int(payment.total*100),
             "shippingAmount": int(payment.delivery*100),
             "currency": payment.currency,
+            "purpose", "{}-{}".format(payment.variant[:18], payment.id)
             "shippingAddresseeGivenName": shipping["first_name"],
             "shippingAddresseeLastName": shipping["last_name"],
             "shippingCompany": shipping.get("company", None),
