@@ -63,11 +63,11 @@ class PaydirektProvider(BasicProvider):
     endpoint = "https://payment.girosolution.de"
 
     # DANGER: there is no playground url, check if Project has test status
-    def __init__(self, merchantId, projectId, secret, default_cart_type="PHYSICAL", overcapture=False, **kwargs):
+    def __init__(self, merchantId, projectId, secret, default_carttype="PHYSICAL", overcapture=False, **kwargs):
         self.merchantId = merchantId
         self.projectId = projectId
         self.secret = secret
-        self.default_cart_type = default_cart_type
+        self.default_carttype = default_carttype
         self.overcapture = overcapture
         super(PaydirektProvider, self).__init__(**kwargs)
         if not self._capture:
@@ -92,11 +92,13 @@ class PaydirektProvider(BasicProvider):
         body = {
             "type":  "SALE" if self._capture else "AUTH",
             "amount": int(payment.total*100),
-            "shippingAmount": int(payment.delivery*100),
             "currency": payment.currency,
-            "purpose", "{}-{}".format(payment.variant[:18], payment.id)
+            "purpose", "{}-{}".format(payment.variant[:18], payment.id),
+            "shippingAmount": int(payment.delivery*100),
+            "shippingAddresseFirstName": shipping["first_name"],
+            "shippingAddresseLastName": shipping["last_name"],
             "shippingCompany": shipping.get("company", None),
-            "additionalAddressInformation": shipping["address_2"],
+            "shippingAdditionalAddressInformation": shipping["address_2"],
             "shippingStreet": shipping["address_1"],
             "shippingStreetNumber": extract_streetnr(shipping["address_1"], "0"),
             "shippingZipCode": shipping["postcode"],
@@ -104,11 +106,9 @@ class PaydirektProvider(BasicProvider):
             "shippingCountry": shipping["country_code"],
             "shippingEmail": payment.billing_email,
             #"items": getattr(payment, "items", None),
-            "shoppingCartType": getattr(payment, "carttype", self.default_cart_type),
+            "shoppingCartType": getattr(payment, "carttype", self.default_carttype),
             # payment id can repeat if different shop systems are used
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
-            "shippingAddresseFirstName": shipping["first_name"],
-            "shippingAddresseLastName": shipping["last_name"],
             "orderId": str(payment.id),
             "urlRedirect": payment.get_success_url(),
             "urlNotify": self.get_return_url(payment),
