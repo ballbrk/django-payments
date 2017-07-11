@@ -36,6 +36,7 @@ def check_response(response, response_json):
     if response.status_code not in [200, 201] or response_json["rc"] != 4000:
         error_code = response_json.get("rc", None)
         gateway_error = response_json.get("msg", None)
+        logging.error(str(response_json))
         raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
 
 # Capture: if False ORDER is used
@@ -118,6 +119,7 @@ class PaydirektProvider(BasicProvider):
         body = {k: v for k, v in body.items() if v}
         self.auth_for_dict(body, self.checkout_field_order)
 
+        logging.error(str(body))
         response = requests.post(self.path_checkout.format(self.endpoint), data=body)
         json_response = json.loads(response.text)
         check_response(response, json_response)
