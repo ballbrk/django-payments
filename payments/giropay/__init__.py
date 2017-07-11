@@ -127,14 +127,9 @@ class PaydirektProvider(BasicProvider):
         raise RedirectNeeded(json_response["redirect"])
 
     def process_data(self, payment, request):
-        try:
-            results = json.loads(request.body, use_decimal=True)
-        except (ValueError, TypeError):
-            logging.error("Payment failed because of unparseable object")
-            return HttpResponseForbidden('FAILED')
         if not payment.transaction_id:
-            payment.transaction_id = results["gcBackendTxId"]
-        if results["gcResultPayment"] == "APPROVED":
+            payment.transaction_id = int(request.GET["gcBackendTxId"])
+        if int(request.GET["gcResultPayment"]) == 4000:
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
             else:
@@ -149,7 +144,7 @@ class PaydirektProvider(BasicProvider):
         body = {
             "amount": int(amount*100),
             "currency": payment.currency,
-            "purpose": "capture",
+            "purpose": "capture-{}".format(payment.id),
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
             "reference": payment.transaction_id,
             "final": final
