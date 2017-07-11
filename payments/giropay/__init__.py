@@ -128,7 +128,7 @@ class PaydirektProvider(BasicProvider):
 
     def process_data(self, payment, request):
         if not payment.transaction_id:
-            payment.transaction_id = int(request.GET["gcBackendTxId"])
+            payment.transaction_id = request.GET["gcBackendTxId"]
         if int(request.GET["gcResultPayment"]) == 4000:
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
