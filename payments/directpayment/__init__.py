@@ -27,7 +27,7 @@ class DirectPaymentProvider(BasicProvider):
         self.withorderform = withorderform
         if not self._capture:
             raise ImproperlyConfigured(
-                'advance payment does not support pre-authorization.')
+                'Direct Payments do not support pre-authorization.')
 
     def get_form(self, payment, data=None):
         if not payment.id:

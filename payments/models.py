@@ -77,6 +77,7 @@ class AbstractBasePayment(object):
         return reverse('process_payment', kwargs={'token': self.token})
 
     def capture(self, amount=None, final=False):
+        """ Captures  a amount """
         if self.status != PaymentStatus.PREAUTH:
             raise ValueError(
                 'Only pre-authorized payments can be captured.')
@@ -85,6 +86,9 @@ class AbstractBasePayment(object):
         if amount:
             self.captured_amount = amount
             self.change_status(PaymentStatus.CONFIRMED)
+        elif final:
+            self.change_status(PaymentStatus.CONFIRMED)
+        return self.captured_amount
 
     def release(self):
         if self.status != PaymentStatus.PREAUTH:
@@ -102,12 +106,15 @@ class AbstractBasePayment(object):
             if amount > self.captured_amount:
                 raise ValueError(
                     'Refund amount can not be greater then captured amount')
-            provider = provider_factory(self.variant)
-            amount = provider.refund(self, amount)
-            self.captured_amount -= amount
-        if self.captured_amount == 0 and self.status != PaymentStatus.REFUNDED:
+        provider = provider_factory(self.variant)
+        amount = provider.refund(self, amount)
+        self.captured_amount -= amount
+        # with incorrect fee calculation, there can be a negative captured_amount
+        # should not happen but allow this case instead of not updating status
+        if self.captured_amount <= 0 and self.status != PaymentStatus.REFUNDED:
             self.change_status(PaymentStatus.REFUNDED)
-        self.save()
+        return amount
+
 
     @property
     def attrs(self):

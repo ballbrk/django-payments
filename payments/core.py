@@ -103,7 +103,7 @@ class BasicProvider(object):
         raise NotImplementedError()
 
     def release(self, payment):
-        ''' Refund/annilates whole payment, returns nothing '''
+        ''' Annilates whole payment, returns nothing '''
         raise NotImplementedError()
 
     def refund(self, payment, amount=None):
