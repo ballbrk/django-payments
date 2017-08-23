@@ -121,11 +121,11 @@ class PaydirektProvider(BasicProvider):
         response = requests.post(self.path_checkout.format(self.endpoint), data=body)
         json_response = json.loads(response.text)
         check_response(response, json_response)
+        payment.transaction_id = json_response["reference"]
+        payment.save()
         raise RedirectNeeded(json_response["redirect"])
 
     def process_data(self, payment, request):
-        if not payment.transaction_id:
-            payment.transaction_id = request.GET["gcBackendTxId"]
         if int(request.GET["gcResultPayment"]) == 4000:
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
@@ -141,7 +141,7 @@ class PaydirektProvider(BasicProvider):
         body = {
             "amount": int(amount*100),
             "currency": payment.currency,
-            "purpose": "capture-{}".format(payment.id),
+            "purpose": "capture-{}: {}".format(payment.id, amount),
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
             "reference": payment.transaction_id,
             "final": final
@@ -159,7 +159,7 @@ class PaydirektProvider(BasicProvider):
         body = {
             "amount": int(amount*100),
             "currency": payment.currency,
-            "purpose": "capture",
+            "purpose": "refund-{}: {}".format(payment.id, amount),
             "merchantTxId": "{}-{}".format(self.projectId, payment.id),
             "reference": payment.transaction_id
         }

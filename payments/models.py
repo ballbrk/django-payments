@@ -22,6 +22,10 @@ class PaymentAttributeProxy(object):
         data = json.loads(self._payment.extra_data or '{}')
         return data[item]
 
+    def __hasattr__(self, item):
+        data = json.loads(self._payment.extra_data or '{}')
+        return item in data
+
     def __setattr__(self, key, value):
         if key == '_payment':
             return super(PaymentAttributeProxy, self).__setattr__(key, value)
@@ -106,6 +110,8 @@ class AbstractBasePayment(object):
             if amount > self.captured_amount:
                 raise ValueError(
                     'Refund amount can not be greater then captured amount')
+        else:
+            amount = self.captured_amount
         provider = provider_factory(self.variant)
         amount = provider.refund(self, amount)
         self.captured_amount -= amount
