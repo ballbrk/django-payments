@@ -19,7 +19,6 @@ import email.utils
 import hmac
 import simplejson as json
 import time
-import logging
 import decimal
 
 import requests
@@ -119,7 +118,6 @@ class PaydirektProvider(BasicProvider):
         body = {k: v for k, v in body.items() if v}
         self.auth_for_dict(body, self.checkout_field_order)
 
-        logging.error(str(body))
         response = requests.post(self.path_checkout.format(self.endpoint), data=body)
         json_response = json.loads(response.text)
         check_response(response, json_response)
