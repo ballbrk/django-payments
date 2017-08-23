@@ -35,7 +35,7 @@ def check_response(response, response_json):
     if response.status_code not in [200, 201] or int(response_json["rc"]) != 0:
         error_code = response_json.get("rc", None)
         gateway_error = response_json.get("msg", None)
-        raise PaymentError("\n--------------------\n".join(response.status_code, response_json), code=error_code, gateway_message=gateway_error)
+        raise PaymentError("\n--------------------\n".join([response.status_code, response_json]), code=error_code, gateway_message=gateway_error)
 
 # Capture: if False ORDER is used
 class PaydirektProvider(BasicProvider):
