@@ -20,11 +20,10 @@ class PaymentAttributeProxy(object):
 
     def __getattr__(self, item):
         data = json.loads(self._payment.extra_data or '{}')
-        return data[item]
-
-    def __hasattr__(self, item):
-        data = json.loads(self._payment.extra_data or '{}')
-        return item in data
+        try:
+            return data[item]
+        except KeyError as e:
+            raise AttributeError() from e
 
     def __setattr__(self, key, value):
         if key == '_payment':
