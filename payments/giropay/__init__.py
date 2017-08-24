@@ -54,9 +54,13 @@ class PaydirektProvider(BasicProvider):
 
     #  capture/refund
     cr_field_order = ["merchantId", "projectId", "merchantTxId", "amount", "currency", "purpose", "reference", "merchantReconciliationReferenceNumber", "final"]
+
+    # void
+    void_field_order = ["merchantId", "projectId", "merchantTxId", "reference"]
     path_checkout = "{}/girocheckout/api/v2/transaction/start"
     path_capture = "{}/girocheckout/api/v2/transaction/capture"
     path_refund = "{}/girocheckout/api/v2/transaction/refund"
+    path_void = "{}/girocheckout/api/v2/transaction/void"
 
     endpoint = "https://payment.girosolution.de"
 
@@ -91,7 +95,7 @@ class PaydirektProvider(BasicProvider):
             "type":  "SALE" if self._capture else "AUTH",
             "amount": int(payment.total*100),
             "currency": payment.currency,
-            "purpose": "{}-{}".format(payment.variant[:18], payment.id),
+            "purpose": payment.description[:35],
             "shippingAmount": int(payment.delivery*100),
             "shippingAddresseFirstName": shipping["first_name"],
             "shippingAddresseLastName": shipping["last_name"],
@@ -127,6 +131,9 @@ class PaydirektProvider(BasicProvider):
 
     def process_data(self, payment, request):
         if int(request.GET["gcResultPayment"]) == 4000:
+            if not hasattr(payment.attrs, "MerchantTxId"):
+                payment.attrs.MerchantTxId = request.GET["gcMerchantTxId"]
+                payment.attrs.BackendTxId = request.GET["gcBackendTxId"]
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
             else:
@@ -141,8 +148,8 @@ class PaydirektProvider(BasicProvider):
         body = {
             "amount": int(amount*100),
             "currency": payment.currency,
-            "purpose": "capture-{}: {}".format(payment.id, amount),
-            "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "purpose": "c-{}".format(payment.description),
+            "merchantTxId": payment.attrs.MerchantTxId,
             "reference": payment.transaction_id,
             "final": final
         }
@@ -153,14 +160,25 @@ class PaydirektProvider(BasicProvider):
         check_response(response, json_response)
         return decimal.Decimal("{}.{}".format(*divmod(json_response["amount"], 100)))
 
+    def release(self, payment):
+        body = {
+            "merchantTxId": payment.attrs.MerchantTxId,
+            "reference": payment.transaction_id
+        }
+        self.auth_for_dict(body, self.void_field_order)
+        response = requests.post(self.path_void.format(self.endpoint), \
+                                 data=body)
+        json_response = json.loads(response.text, use_decimal=True)
+        check_response(response, json_response)
+
     def refund(self, payment, amount=None):
         if not amount:
             amount = payment.total
         body = {
             "amount": int(amount*100),
             "currency": payment.currency,
-            "purpose": "refund-{}: {}".format(payment.id, amount),
-            "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "purpose": "r-{}".format(payment.description),
+            "merchantTxId": payment.attrs.MerchantTxId,
             "reference": payment.transaction_id
         }
         self.auth_for_dict(body, self.cr_field_order)
