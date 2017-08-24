@@ -91,6 +91,8 @@ class PaydirektProvider(BasicProvider):
             payment.save()
         # email_hash = sha256(payment.billing_email.encode("utf-8")).digest())
         shipping = payment.get_shipping_address()
+        # payment id can repeat if different shop systems are used, so add projectId
+        payment.attrs.MerchantTxId = "{}-{}".format(self.projectId, payment.id)
         body = {
             "type":  "SALE" if self._capture else "AUTH",
             "amount": int(payment.total*100),
@@ -109,8 +111,7 @@ class PaydirektProvider(BasicProvider):
             "shippingEmail": payment.billing_email,
             #"items": getattr(payment, "items", None),
             "shoppingCartType": getattr(payment, "carttype", self.default_carttype),
-            # payment id can repeat if different shop systems are used
-            "merchantTxId": "{}-{}".format(self.projectId, payment.id),
+            "merchantTxId": payment.attrs.MerchantTxId,
             "orderId": str(payment.id),
             "urlRedirect": payment.get_success_url(),
             "urlNotify": self.get_return_url(payment),
@@ -131,8 +132,7 @@ class PaydirektProvider(BasicProvider):
 
     def process_data(self, payment, request):
         if int(request.GET["gcResultPayment"]) == 4000:
-            if not hasattr(payment.attrs, "MerchantTxId"):
-                payment.attrs.MerchantTxId = request.GET["gcMerchantTxId"]
+            if not hasattr(payment.attrs, "gcBackendTxId"):
                 payment.attrs.BackendTxId = request.GET["gcBackendTxId"]
             if self._capture:
                 payment.change_status(PaymentStatus.CONFIRMED)
