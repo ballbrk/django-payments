@@ -182,7 +182,7 @@ class PaydirektProvider(BasicProvider):
             "reference": payment.transaction_id
         }
         self.auth_for_dict(body, self.cr_field_order)
-        response = requests.post(self.path_capture.format(self.endpoint), \
+        response = requests.post(self.path_refund.format(self.endpoint), \
                                  data=body)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
