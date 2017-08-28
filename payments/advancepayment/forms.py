@@ -3,9 +3,9 @@ from django import forms
 
 class IBANBankingForm(forms.Form):
     # only shown, return is ignored
-    order = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label=_("Please supply as reference"))
     iban = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label="IBAN")
     bic = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label="BIC")
+    order = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label=_("Please supply as reference"))
     method = "post"
     action = ""
 
