@@ -22,9 +22,10 @@ class DirectPaymentProvider(BasicProvider):
             show Form with order number
     '''
 
-    def __init__(self, withorderform=False, **kwargs):
+    def __init__(self, withreference=False, prefix="", **kwargs):
         super(DirectPaymentProvider, self).__init__(**kwargs)
-        self.withorderform = withorderform
+        self.withreference = withreference
+        self.prefix = prefix
         if not self._capture:
             raise ImproperlyConfigured(
                 'Direct Payments do not support pre-authorization.')
@@ -32,9 +33,9 @@ class DirectPaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
-        if self.withorderform:
-            if not data or not data.get("orderid", None):
-                return OrderIdForm({"orderid": payment.id}, payment, self)
+        if self.withreference:
+            if not data or not data.get("order", None):
+                return OrderIdForm({"order": payment.id}, payment, self)
         payment.change_status(PaymentStatus.CONFIRMED)
         raise RedirectNeeded(payment.get_success_url())
 

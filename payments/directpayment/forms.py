@@ -1,9 +1,9 @@
-
+from django.utils.translation import ugettext_lazy as _
 from django import forms
 
 class OrderIdForm(forms.Form):
     # only shown, return is ignored
-    orderid = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
+    order = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label=_("Please supply as reference"))
     method = "post"
     action = ""
 
