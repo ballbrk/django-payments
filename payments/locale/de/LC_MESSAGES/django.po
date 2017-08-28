@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-28 11:27+0200\n"
+"POT-Creation-Date: 2017-08-28 11:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: payments/__init__.py:25
 msgctxt "payment status"
 msgid "Waiting for confirmation"
@@ -73,12 +74,14 @@ msgid "Review"
 msgstr "Überprüfung"
 
 #: payments/advancepayment/forms.py:6
-msgid "Order"
-msgstr "Bestellung"
+msgid "Please supply as reference"
+msgstr "Bitte als Referenz angeben"
 
 #: payments/cybersource/__init__.py:100
 msgid "The order is marked for review by Decision Manager"
-msgstr "Die Bestellung ist markiert für eine Überprüfung durch den \"Decision Manager\""
+msgstr ""
+"Die Bestellung ist markiert für eine Überprüfung durch den \"Decision Manager"
+"\""
 
 #: payments/cybersource/__init__.py:105
 msgid "The order has been rejected by Decision Manager"
@@ -97,8 +100,10 @@ msgid "Card verification number (CVN) did not match."
 msgstr "Kartenverifikationsnummer (CVN) stimmt nicht überein."
 
 #: payments/cybersource/__init__.py:125
-msgid "CyberSource Addressenverifikations-Service schlug fehl."
-msgstr ""
+#, fuzzy
+#| msgid "CyberSource Smart Authorization failed."
+msgid "CyberSource Address Verification Service failed."
+msgstr "CyberSource Smart Authorization schlug fehl."
 
 #: payments/cybersource/__init__.py:146
 msgid "3-D Secure verification in progress"
@@ -108,7 +113,9 @@ msgstr "\"3-D Secure\" Verifikation wird ausgeführt"
 msgid ""
 "Our bank has flagged your transaction as unusually suspicious. Please "
 "contact us to resolve this issue."
-msgstr "Unsere Bank hat die Transaktion als verdächtig markiert. Bitte kontaktieren Sie uns um das Problem zu beheben"
+msgstr ""
+"Unsere Bank hat die Transaktion als verdächtig markiert. Bitte kontaktieren "
+"Sie uns um das Problem zu beheben"
 
 #: payments/cybersource/__init__.py:206
 msgid ""
@@ -119,12 +126,16 @@ msgstr "Ihre Bank hat die Transaktion abgewiesen. Kein Grund wurde angegeben"
 #: payments/cybersource/__init__.py:209
 msgid ""
 "The card has either expired or you have entered an incorrect expiration date."
-msgstr "Die Karte ist entweder abgelaufen oder Sie haben ein falsches Ablaufdatum eingegeben."
+msgstr ""
+"Die Karte ist entweder abgelaufen oder Sie haben ein falsches Ablaufdatum "
+"eingegeben."
 
 #: payments/cybersource/__init__.py:212
 msgid ""
 "There are insufficient funds on your card or it has reached its credit limit."
-msgstr "Es ist entweder zu wenig Guthaben auf Ihrer Karte oder das Kreditkartenlimit wurde erreicht."
+msgstr ""
+"Es ist entweder zu wenig Guthaben auf Ihrer Karte oder das Kreditkartenlimit "
+"wurde erreicht."
 
 #: payments/cybersource/__init__.py:215
 msgid "The card you are trying to use was reported as lost or stolen."
@@ -134,19 +145,25 @@ msgstr "Die benutzte Karte wurde als verloren oder gestohlen gemeldet."
 msgid ""
 "Your card is either inactive or it does not permit online payments. Please "
 "contact your bank to resolve this issue."
-msgstr "Ihre Karte ist entweder deaktiviert oder erlaubt keine Online-Bezahlungen. Bitte kontaktieren Sie Ihre Bank."
+msgstr ""
+"Ihre Karte ist entweder deaktiviert oder erlaubt keine Online-Bezahlungen. "
+"Bitte kontaktieren Sie Ihre Bank."
 
 #: payments/cybersource/__init__.py:221
 msgid ""
 "Your bank has declined the transaction. Please check the verification number "
 "of your card and retry."
-msgstr "Ihre Bank hat die Transaktion abgelehnt. Bitte überprüfen Sie die Verfifikationsnummer ihrer Karte und probieren es erneut."
+msgstr ""
+"Ihre Bank hat die Transaktion abgelehnt. Bitte überprüfen Sie die "
+"Verfifikationsnummer ihrer Karte und probieren es erneut."
 
 #: payments/cybersource/__init__.py:224
 msgid ""
 "Your bank has declined the transaction. Please make sure the card number you "
 "have entered is correct and retry."
-msgstr "Ihre Bank hat die Transaktion abgelehnt. Bitte überprüfen Sie die Kartennummer ihrer Karte und probieren es erneut."
+msgstr ""
+"Ihre Bank hat die Transaktion abgelehnt. Bitte überprüfen Sie die "
+"Kartennummer ihrer Karte und probieren es erneut."
 
 #: payments/cybersource/__init__.py:227
 msgid "We are sorry but our bank cannot handle the card type you are using."
@@ -156,11 +173,15 @@ msgstr "Unsere Bank kann Ihren Kartentypen nicht verarbeiten."
 msgid ""
 "We were unable to verify your address. Please make sure the address you "
 "entered is correct and retry."
-msgstr "Wir können Ihre Addresse nicht verifizieren. Bitte überprüfen Sie sie und probieren es erneut."
+msgstr ""
+"Wir können Ihre Addresse nicht verifizieren. Bitte überprüfen Sie sie und "
+"probieren es erneut."
 
 #: payments/cybersource/__init__.py:234
 msgid "We were unable to complete the transaction. Please try again later."
-msgstr "Wir konnten die Transaktion nicht verarbeiten. Bitte probieren Sie es später erneut."
+msgstr ""
+"Wir konnten die Transaktion nicht verarbeiten. Bitte probieren Sie es später "
+"erneut."
 
 #: payments/cybersource/forms.py:51
 msgid "fingerprint"
@@ -199,7 +220,9 @@ msgstr "CVV2 Sicherheitsnummer"
 msgid ""
 "Last three digits located on the back of your card. For American Express the "
 "four digits found on the front side."
-msgstr "Die letzten drei Ziffern auf der Rückseite Ihrer Karte. Bei American Express befinden sich die 4 Ziffern auf der Vorderseite."
+msgstr ""
+"Die letzten drei Ziffern auf der Rückseite Ihrer Karte. Bei American Express "
+"befinden sich die 4 Ziffern auf der Vorderseite."
 
 #: payments/forms.py:66
 msgid "Name on Credit Card"
@@ -220,3 +243,6 @@ msgstr "Monat"
 #: payments/utils.py:16
 msgid "Year"
 msgstr "Jahr"
+
+#~ msgid "Order"
+#~ msgstr "Bestellung"
