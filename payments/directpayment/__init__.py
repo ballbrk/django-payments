@@ -20,12 +20,18 @@ class DirectPaymentProvider(BasicProvider):
 
         withreference:
             show Form with order number
+        safer:
+            if you don't verify the name; don't allow people supplying other order numbers (by adding uuid)
+            this is a bit cumbersu
+        prefix:
+
     '''
 
-    def __init__(self, withreference=False, prefix="", **kwargs):
+    def __init__(self, withreference=False, safer=False, prefix="", **kwargs):
         super(DirectPaymentProvider, self).__init__(**kwargs)
         self.withreference = withreference
         self.prefix = prefix
+        self.safer = safer
         if not self._capture:
             raise ImproperlyConfigured(
                 'Direct Payments do not support pre-authorization.')
@@ -33,7 +39,10 @@ class DirectPaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
-            payment.transaction_id = "{}{}".format(self.prefix, payment.id)
+            if self.safer:
+                payment.transaction_id = "{}{}-".format(self.prefix, payment.id, payment.token)
+            else:
+                payment.transaction_id = "{}{}".format(self.prefix, payment.id)
             payment.save()
         if self.withreference:
             if not data or not data.get("order", None):
