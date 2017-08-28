@@ -212,7 +212,7 @@ class PaydirektProvider(BasicProvider):
                                      headers=header)
             json_response = json.loads(response.text, use_decimal=True)
             check_response(response, json_response)
-        return json_response["amount"]
+        return amount
 
     def refund(self, payment, amount=None):
         if not amount:
@@ -228,4 +228,4 @@ class PaydirektProvider(BasicProvider):
                                  data=json.dumps(body, use_decimal=True), headers=header)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
-        return json_response["amount"]
+        return amount

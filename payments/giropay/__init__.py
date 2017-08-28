@@ -158,7 +158,7 @@ class PaydirektProvider(BasicProvider):
                                  data=body)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
-        return decimal.Decimal("{}.{}".format(*divmod(int(json_response["amount"]), 100)))
+        return amount
 
     def release(self, payment):
         body = {
@@ -186,4 +186,4 @@ class PaydirektProvider(BasicProvider):
                                  data=body)
         json_response = json.loads(response.text, use_decimal=True)
         check_response(response, json_response)
-        return decimal.Decimal("{}.{}".format(*divmod(int(json_response["amount"]), 100)))
+        return amount

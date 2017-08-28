@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import json
 from uuid import uuid4
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -84,14 +85,14 @@ class AbstractBasePayment(object):
         if self.status != PaymentStatus.PREAUTH:
             raise ValueError(
                 'Only pre-authorized payments can be captured.')
+        if not amount:
+            amount = min(self.total-self.captured_amount, Decimal("0"))
         provider = provider_factory(self.variant)
-        amount = provider.capture(self, amount, final)
-        if amount:
-            self.captured_amount = amount
+        provider.capture(self, amount, final)
+        self.captured_amount += amount
+        if final:
             self.change_status(PaymentStatus.CONFIRMED)
-        elif final:
-            self.change_status(PaymentStatus.CONFIRMED)
-        return self.captured_amount
+        return amount
 
     def release(self):
         if self.status != PaymentStatus.PREAUTH:
@@ -112,12 +113,12 @@ class AbstractBasePayment(object):
         else:
             amount = self.captured_amount
         provider = provider_factory(self.variant)
-        ret = provider.refund(self, amount)
+        provider.refund(self, amount)
         self.captured_amount -= amount
         # if something wents wrong negative values can appear, handle gracefully
         if self.captured_amount <= 0 and self.status != PaymentStatus.REFUNDED:
             self.change_status(PaymentStatus.REFUNDED)
-        return ret
+        return amount
 
 
     @property
