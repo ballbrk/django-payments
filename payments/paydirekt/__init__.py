@@ -34,9 +34,8 @@ def check_response(response, response_json=None):
     if response.status_code not in [200, 201]:
         if response_json:
             try:
-                error_code = response_json["messages"][0]["code"] if "messages" in response_json and len(response_json["messages"]) > 0 else None
-                gateway_error = response_json.get("error_description", None)
-                raise PaymentError(str(response.status_code), code=error_code, gateway_message=gateway_error)
+                errorcode = response_json["messages"][0]["code"] if "messages" in response_json and len(response_json["messages"]) > 0 else None
+                raise PaymentError("{}\n--------------------\n{}".format(response.status_code, response_json), code=errorcode)
             except KeyError:
                 raise PaymentError(str(response.status_code))
         else:
