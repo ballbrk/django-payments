@@ -112,13 +112,12 @@ class AbstractBasePayment(object):
         else:
             amount = self.captured_amount
         provider = provider_factory(self.variant)
-        amount = provider.refund(self, amount)
+        ret = provider.refund(self, amount)
         self.captured_amount -= amount
-        # with incorrect fee calculation, there can be a negative captured_amount
-        # should not happen but allow this case instead of not updating status
+        # if something wents wrong negative values can appear, handle gracefully
         if self.captured_amount <= 0 and self.status != PaymentStatus.REFUNDED:
             self.change_status(PaymentStatus.REFUNDED)
-        return amount
+        return ret
 
 
     @property
