@@ -32,18 +32,20 @@ class AdvancePaymentProvider(BasicProvider):
             raise ImproperlyConfigured(
                 'Advance Payment does not support pre-authorization.')
 
-    def initialize_form(self, paymentid):
+    def initialize_form(self, payment):
         return {
             'iban': self.iban,
             'bic': self.bic,
-            'order': "{}{}".format(self.prefix, paymentid)
+            'order': payment.transaction_id
         }
 
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
+            payment.transaction_id = "{}{}".format(self.prefix, payment.id)
+            payment.save()
         if not data or not data.get("order", None):
-            return IBANBankingForm(self.initialize_form(payment.id), payment, self)
+            return IBANBankingForm(self.initialize_form(payment), payment, self)
         payment.change_status(PaymentStatus.CONFIRMED)
         raise RedirectNeeded(payment.get_success_url())
 
