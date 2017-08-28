@@ -79,7 +79,7 @@ class AbstractBasePayment(object):
     def get_process_url(self):
         return reverse('process_payment', kwargs={'token': self.token})
 
-    def capture(self, amount=None, final=False):
+    def capture(self, amount=None, final=True):
         """ Captures  a amount """
         if self.status != PaymentStatus.PREAUTH:
             raise ValueError(

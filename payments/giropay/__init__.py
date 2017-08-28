@@ -142,7 +142,7 @@ class PaydirektProvider(BasicProvider):
             payment.change_status(PaymentStatus.ERROR)
         return HttpResponse('OK')
 
-    def capture(self, payment, amount=None, final=False):
+    def capture(self, payment, amount=None, final=True):
         if not amount:
             amount = payment.total
         body = {

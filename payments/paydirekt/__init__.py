@@ -192,7 +192,7 @@ class PaydirektProvider(BasicProvider):
         payment.save()
         return HttpResponse('OK')
 
-    def capture(self, payment, amount=None, final=False):
+    def capture(self, payment, amount=None, final=True):
         if not amount:
             amount = payment.total
         self.check_and_update_token()

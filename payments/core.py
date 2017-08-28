@@ -98,7 +98,7 @@ class BasicProvider(object):
             return url + '?' + qs
         return url
 
-    def capture(self, payment, amount=None, final=False):
+    def capture(self, payment, amount=None, final=True):
         ''' Capture a fraction of the total amount of a payment. Return amount captured '''
         raise NotImplementedError()
 
