@@ -48,6 +48,7 @@ class AdvancePaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
+        if not payment.transaction_id:
             payment.transaction_id = "{}{}".format(self.prefix, payment.id)
             payment.save()
         if not data or not data.get("order", None):

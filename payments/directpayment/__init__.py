@@ -40,6 +40,7 @@ class DirectPaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
+        if not payment.transaction_id:
             if self.safer:
                 payment.transaction_id = "{}{}-".format(self.prefix, payment.id, payment.token)
             else:
