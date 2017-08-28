@@ -21,9 +21,10 @@ class DirectPaymentProvider(BasicProvider):
         withreference:
             show Form with order number
         safer:
-            if you don't verify the name; don't allow people supplying other order numbers (by adding uuid)
-            this is a bit cumbersu
+            if you don't verify the name; don't allow people supplying other order numbers (by adding token)
+            is much longer so default off
         prefix:
+            reference: add prefix to payment id
 
     '''
 

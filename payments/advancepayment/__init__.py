@@ -19,6 +19,12 @@ class AdvancePaymentProvider(BasicProvider):
         banking software or user confirms transaction (with token).
         The user gets only the id, the seller can confirm with the token.
         The form is only needed to show the user the data
+        iban:
+            IBAN
+        bic:
+            BIC
+        prefix:
+            reference: add prefix to payment id
     '''
 
     def __init__(self, iban, bic, prefix="", **kwargs):
