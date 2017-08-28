@@ -1,11 +1,11 @@
-
+from django.utils.translation import ugettext_lazy as _
 from django import forms
 
 class IBANBankingForm(forms.Form):
     # only shown, return is ignored
-    orderid = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
-    iban = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
-    bic = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
+    order = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label=_("Order"))
+    iban = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label="IBAN")
+    bic = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label="BIC")
     method = "post"
     action = ""
 

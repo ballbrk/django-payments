@@ -21,11 +21,12 @@ class AdvancePaymentProvider(BasicProvider):
         The form is only needed to show the user the data
     '''
 
-    def __init__(self, iban, bic, **kwargs):
+    def __init__(self, iban, bic, prefix="", **kwargs):
         if len(iban) <= 10 or len(bic) != 11:
             raise ImproperlyConfigured("Wrong IBAN or BIC")
         self.iban=iban.upper()
         self.bic=bic.upper()
+        self.prefix = prefix
         super(AdvancePaymentProvider, self).__init__(**kwargs)
         if not self._capture:
             raise ImproperlyConfigured(
@@ -35,7 +36,7 @@ class AdvancePaymentProvider(BasicProvider):
         return {
             'iban': self.iban,
             'bic': self.bic,
-            'orderid': paymentid
+            'order': "{}{}".format(self.prefix, paymentid)
         }
 
     def get_form(self, payment, data=None):
