@@ -18,7 +18,7 @@ class DirectPaymentProvider(BasicProvider):
         Payment is done manually e.g. cash on delivery
         Because of that there is no limitation and payments are confirmed without checks
 
-        withorderform:
+        withreference:
             show Form with order number
     '''
 
@@ -33,9 +33,11 @@ class DirectPaymentProvider(BasicProvider):
     def get_form(self, payment, data=None):
         if not payment.id:
             payment.save()
+            payment.transaction_id = "{}{}".format(self.prefix, payment.id)
+            payment.save()
         if self.withreference:
             if not data or not data.get("order", None):
-                return OrderIdForm({"order": payment.id}, payment, self)
+                return OrderIdForm({"order": payment.transaction_id}, payment, self)
         payment.change_status(PaymentStatus.CONFIRMED)
         raise RedirectNeeded(payment.get_success_url())
 
