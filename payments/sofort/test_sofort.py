@@ -5,44 +5,14 @@ import json
 
 from . import SofortProvider
 from .. import PaymentStatus, RedirectNeeded
-from ..utils import create_get_address
+from ..testcommon import create_test_payment
 
 SECRET = 'abcd1234'
 CLIENT_ID = '1234'
 PROJECT_ID = 'abcd'
 
 
-class Payment(Mock):
-    id = 1
-    variant = 'sagepay'
-    currency = 'USD'
-    total = 100
-    status = PaymentStatus.WAITING
-    transaction_id = None
-    captured_amount = 0
-    billing_first_name = 'John'
-    billing_last_name = 'Smith'
-    billing_address_1 = 'JohnStreet 23'
-    billing_address_2 = ''
-    billing_city = 'Neches'
-    billing_postcode = "75779"
-    billing_country_code = "US"
-    billing_country_area = "Tennessee"
-
-    get_billing_address = create_get_address("billing")
-    get_shipping_address = create_get_address("billing")
-
-    def get_process_url(self):
-        return 'http://example.com'
-
-    def get_failure_url(self):
-        return 'http://cancel.com'
-
-    def get_success_url(self):
-        return 'http://success.com'
-
-    def change_status(self, status):
-        self.status = status
+Payment = create_test_payment("sagepay", "ll")
 
 
 class TestSofortProvider(TestCase):

@@ -1,10 +1,5 @@
 from unittest import TestCase
-try:
-    from urllib.error import URLError
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
-    from urllib2 import URLError
+
 try:
     from unittest.mock import MagicMock
 except ImportError:
@@ -12,6 +7,7 @@ except ImportError:
 
 from . import PaydirektProvider
 from .. import FraudStatus, PaymentError, PaymentStatus, RedirectNeeded
+from ..testcommon import create_test_payment
 
 VARIANT = 'paydirekt'
 API_KEY = '5a4dae68-2715-4b1e-8bb2-2c2dbe9255f6'
@@ -23,28 +19,7 @@ PROCESS_DATA = {
   "checkoutStatus" : "APPROVED"
 }
 
-class Payment(object):
-    id = 1
-    variant = VARIANT
-    currency = 'EUR'
-    total = 100
-    status = PaymentStatus.WAITING
-    fraud_status = ''
-
-    def get_process_url(self):
-        return 'http://example.com'
-
-    def get_failure_url(self):
-        return 'http://cancel.com'
-
-    def get_success_url(self):
-        return 'http://success.com'
-
-    def change_status(self, new_status):
-        self.status = new_status
-
-    def change_fraud_status(self, fraud_status):
-        self.fraud_status = fraud_status
+Payment = create_test_payment(VARIANT, "skdksl")
 
 
 class TestPaydirektProvider(TestCase):

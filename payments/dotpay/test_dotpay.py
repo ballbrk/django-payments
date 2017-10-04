@@ -8,6 +8,7 @@ from mock import MagicMock, Mock
 from .. import PaymentStatus
 from .forms import ACCEPTED, REJECTED
 from . import DotpayProvider
+from ..testcommon import create_test_payment
 
 VARIANT = 'dotpay'
 PIN = '123'
@@ -45,24 +46,7 @@ def get_post_with_md5(post):
     return post
 
 
-class Payment(Mock):
-    id = 1
-    variant = VARIANT
-    currency = 'USD'
-    total = 100
-    status = PaymentStatus.WAITING
-
-    def get_process_url(self):
-        return 'http://example.com'
-
-    def get_failure_url(self):
-        return 'http://cancel.com'
-
-    def get_success_url(self):
-        return 'http://success.com'
-
-    def change_status(self, status):
-        self.status = status
+Payment = create_test_payment(VARIANT, "skdksl")
 
 
 class TestDotpayProvider(TestCase):

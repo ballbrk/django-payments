@@ -4,10 +4,12 @@ from mock import patch, MagicMock, Mock
 
 from . import AuthorizeNetProvider
 from .. import PaymentStatus, RedirectNeeded
+from ..testcommon import create_test_payment
 
 
 LOGIN_ID = 'abcd1234'
 TRANSACTION_KEY = '1234abdd'
+VARIANT = 'authorizenet'
 
 PROCESS_DATA = {
     'number': '4007000000027',
@@ -18,26 +20,7 @@ PROCESS_DATA = {
 STATUS_CONFIRMED = '1'
 
 
-class Payment(Mock):
-    id = 1
-    variant = 'authorizenet'
-    currency = 'USD'
-    total = 100
-    status = PaymentStatus.WAITING
-    transaction_id = None
-    captured_amount = 0
-
-    def get_process_url(self):
-        return 'http://example.com'
-
-    def get_failure_url(self):
-        return 'http://cancel.com'
-
-    def get_success_url(self):
-        return 'http://success.com'
-
-    def change_status(self, status):
-        self.status = status
+Payment = create_test_payment(VARIANT, "skdksl")
 
 
 
