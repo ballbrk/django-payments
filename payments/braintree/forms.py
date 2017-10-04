@@ -50,7 +50,7 @@ class BraintreePaymentForm(CreditCardPaymentFormWithName):
             'locality': billing["city"],
             'region': billing["country_area"],
             'postal_code': billing["postcode"],
-            'country_code_alpha2': billing["country_code"}
+            'country_code_alpha2': billing["country_code"]}
 
     def get_customer_data(self):
         billing = self.payment.get_billing_address()
