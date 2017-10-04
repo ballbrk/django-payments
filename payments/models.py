@@ -183,4 +183,5 @@ class BasePayment(models.Model, AbstractBasePayment):
 
 @add_address_to_class("billing")
 class BasePaymentWithAddress(AbstractBasePayment):
+    """ Has real billing address + shippingaddress alias on billing address (alias for backward compatibility) """
     get_shipping_address = create_get_address("billing")
