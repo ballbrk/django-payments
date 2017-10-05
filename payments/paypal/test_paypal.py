@@ -2,14 +2,16 @@ from __future__ import unicode_literals
 import json
 from decimal import Decimal
 from unittest import TestCase
-from mock import patch, MagicMock, Mock
+try:
+    from unittest.mock import patch, MagicMock
+except ImportError:
+    from mock import patch, MagicMock
 
 from django.utils import timezone
 from requests import HTTPError
 
 from . import PaypalProvider, PaypalCardProvider
 from .. import RedirectNeeded, PaymentError, PaymentStatus
-from ..utils import create_get_address
 from ..testcommon import create_test_payment
 
 CLIENT_ID = 'abc123'

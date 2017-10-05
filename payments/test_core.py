@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
 from decimal import Decimal
 from unittest import TestCase
-from mock import patch, NonCallableMock
+try:
+    from unittest.mock import patch, NonCallableMock
+except ImportError:
+    from mock import patch, NonCallableMock
 
 from payments import core
 from .forms import CreditCardPaymentFormWithName, PaymentForm
@@ -59,11 +62,11 @@ class TestBasePayment(TestCase):
     @patch('payments.dummy.DummyProvider.capture')
     def test_capture_preauth_without_amount(self, mocked_capture_method):
         amount = None
+        captured_amount = Decimal('100')
         with patch.object(BasePayment, 'save') as mocked_save_method:
             mocked_save_method.return_value = None
             mocked_capture_method.return_value = amount
 
-            captured_amount = Decimal('100')
             status = PaymentStatus.PREAUTH
             payment = BasePayment(variant='default', status=status,
                                   captured_amount=captured_amount)
@@ -99,11 +102,12 @@ class TestBasePayment(TestCase):
     @patch('payments.dummy.DummyProvider.refund')
     def test_refund_without_amount(self, mocked_refund_method):
         refund_amount = None
+        captured_amount = Decimal('200')
         with patch.object(BasePayment, 'save') as mocked_save_method:
             mocked_save_method.return_value = None
             mocked_refund_method.return_value = refund_amount
 
-            captured_amount = Decimal('200')
+
             status = PaymentStatus.CONFIRMED
             payment = BasePayment(variant='default', status=status,
                                   captured_amount=captured_amount)

@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
-from unittest import TestCase
-from mock import patch, MagicMock, Mock
 import json
+from unittest import TestCase
+try:
+    from unittest.mock import patch, MagicMock
+except ImportError:
+    from mock import patch, MagicMock
 
 from . import SofortProvider
 from .. import PaymentStatus, RedirectNeeded

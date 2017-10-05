@@ -3,7 +3,10 @@ import hashlib
 from unittest import TestCase
 
 from django.http import HttpResponse, HttpResponseForbidden
-from mock import MagicMock, Mock
+try:
+    from unittest.mock import MagicMock
+except ImportError:
+    from mock import MagicMock
 
 from .. import PaymentStatus
 from .forms import ACCEPTED, REJECTED

@@ -12,7 +12,7 @@ except ImportError:
     from urllib import urlencode
 
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, tzinfo, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 import os
 import email.utils
@@ -29,6 +29,18 @@ from .. import PaymentError, PaymentStatus, RedirectNeeded
 from ..core import BasicProvider
 from ..utils import extract_streetnr
 
+class utctimezone(tzinfo):
+    def __init__(self):
+        pass
+
+    def utcoffset(self, dt):
+        return timedelta(0)
+
+    def dst(self, dt):
+        return timedelta(0)
+
+    def tzname(self, dt):
+        return "UTC"
 
 def check_response(response, response_json=None):
     if response.status_code not in [200, 201]:
@@ -90,7 +102,7 @@ class PaydirektProvider(BasicProvider):
         """ Retrieves oauth Token and save it as instance variable """
         token_uuid = str(uuid.uuid4()).encode("utf-8")
         nonce = urlsafe_b64encode(os.urandom(48))
-        date_now = datetime.now(timezone.utc)
+        date_now = datetime.now(utctimezone)
         bytessign = token_uuid+b":"+date_now.strftime("%Y%m%d%H%M%S").encode('utf-8')+b":"+self.api_key.encode('utf-8')+b":"+nonce
         h_temp = hmac.new(urlsafe_b64decode(self.secret_b64), msg=bytessign, digestmod='sha256')
 

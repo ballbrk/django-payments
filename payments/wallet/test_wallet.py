@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
 import time
 from decimal import Decimal
-from unittest import TestCase
 
 from django.http import HttpResponse, HttpResponseForbidden
 import jwt
-from mock import MagicMock
+from unittest import TestCase
+try:
+    from unittest.mock import MagicMock
+except ImportError:
+    from mock import MagicMock
 
 from .. import PaymentStatus
 from . import GoogleWalletProvider

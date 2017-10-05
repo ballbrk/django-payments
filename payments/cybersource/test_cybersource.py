@@ -2,8 +2,11 @@ from __future__ import unicode_literals
 from decimal import Decimal
 from unittest import TestCase
 from django.core import signing
-from mock import patch, MagicMock, Mock
 import simplejson as json
+try:
+    from unittest.mock import patch, MagicMock
+except ImportError:
+    from mock import patch, MagicMock
 
 from . import CyberSourceProvider, AUTHENTICATE_REQUIRED, ACCEPTED, \
     TRANSACTION_SETTLED

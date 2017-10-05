@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 from unittest import TestCase
-from mock import patch, MagicMock, Mock
+try:
+    from unittest.mock import patch, MagicMock
+except ImportError:
+    from mock import patch, MagicMock
 
 from . import BraintreeProvider
 from .. import PaymentStatus, RedirectNeeded

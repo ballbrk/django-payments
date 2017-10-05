@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import json
+import six
 from uuid import uuid4
 from decimal import Decimal
 
@@ -24,7 +25,7 @@ class PaymentAttributeProxy(object):
         try:
             return data[item]
         except KeyError as e:
-            raise AttributeError() from e
+            six.raise_from(AttributeError(), e)
 
     def __setattr__(self, key, value):
         if key == '_payment':

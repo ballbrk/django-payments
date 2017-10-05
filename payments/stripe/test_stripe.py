@@ -2,9 +2,12 @@
 from __future__ import unicode_literals
 from contextlib import contextmanager
 
-from mock import patch, Mock
-from unittest import TestCase
 import stripe
+from unittest import TestCase
+try:
+    from unittest.mock import patch, Mock
+except ImportError:
+    from mock import patch, Mock
 
 from . import StripeProvider, StripeCardProvider
 from .. import FraudStatus, PaymentStatus, RedirectNeeded

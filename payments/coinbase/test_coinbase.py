@@ -6,7 +6,10 @@ from decimal import Decimal
 from unittest import TestCase
 
 from django.http import HttpResponse, HttpResponseForbidden
-from mock import MagicMock, patch
+try:
+    from unittest.mock import patch, MagicMock
+except ImportError:
+    from mock import patch, MagicMock
 
 from .. import PaymentStatus
 from . import CoinbaseProvider
