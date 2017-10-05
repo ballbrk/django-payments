@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 
 from .core import provider_factory
 from .utils import add_address_to_class, create_get_address
@@ -126,6 +127,7 @@ class AbstractBasePayment(object):
     def attrs(self):
         return PaymentAttributeProxy(self)
 
+@python_2_unicode_compatible
 class BasePayment(models.Model, AbstractBasePayment):
     '''
     Represents a single transaction. Each instance has one or more PaymentItem.
@@ -179,7 +181,7 @@ class BasePayment(models.Model, AbstractBasePayment):
 
         return super(BasePayment, self).save(**kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.variant
 
 @add_address_to_class("billing")
