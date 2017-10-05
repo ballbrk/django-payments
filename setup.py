@@ -34,6 +34,12 @@ REQUIREMENTS = [
     'suds-jurko>=0.6',
     'xmltodict>=0.9.2']
 
+TEST_REQUIREMENTS = [
+    'pytest',
+    'pytest-django'
+]
+if sys.version_info.major < 3:
+    TEST_REQUIREMENTS.append('mock')
 
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -79,8 +85,5 @@ setup(
     install_requires=REQUIREMENTS,
     cmdclass={
         'test': PyTest},
-    tests_require=[
-        'mock',
-        'pytest',
-        'pytest-django'],
+    tests_require=TEST_REQUIREMENTS,
     zip_safe=False)
