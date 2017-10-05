@@ -28,13 +28,13 @@ PROCESS_DATA = {
     'fingerprint': 'abcd1234'}
 
 
-Payment = create_test_payment(VARIANT, "skdksl")
-Payment.extra_data = json.dumps({'fingerprint_session_id': "fake",
-                                 "merchant_defined_data": {},
-                                 "capture": {}
-                                    })
-
-
+_Payment = create_test_payment(VARIANT, "skdksl")
+class Payment(_Payment):
+    # MagicMock is not serializable so overwrite attrs Proxy
+    class attrs(object):
+        fingerprint_session_id = 'fake'
+        merchant_defined_data = {}
+        capture = {}
 
 class TestCybersourceProvider(TestCase):
 
