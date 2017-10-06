@@ -19,7 +19,7 @@ def create_test_payment(_variant="undefined", _token="342"):
         tax = Decimal(10)
         token = _token
         total = Decimal(100)
-        captured_amount = Decimal(0)
+        captured_amount = Decimal("0.0")
         extra_data = ""
         variant = _variant
         transaction_id = ""

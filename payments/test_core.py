@@ -107,7 +107,6 @@ class TestBasePayment(TestCase):
             mocked_save_method.return_value = None
             mocked_refund_method.return_value = refund_amount
 
-
             status = PaymentStatus.CONFIRMED
             payment = BasePayment(variant='default', status=status,
                                   captured_amount=captured_amount)

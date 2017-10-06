@@ -83,7 +83,7 @@ class AbstractBasePayment(object):
         return reverse('process_payment', kwargs={'token': self.token})
 
     def capture(self, amount=None, final=True):
-        """ Captures an amount of money """
+        ''' Capture a fraction of the total amount of a payment. Return amount captured '''
         if self.status != PaymentStatus.PREAUTH:
             raise ValueError(
                 'Only pre-authorized payments can be captured.')
@@ -97,6 +97,7 @@ class AbstractBasePayment(object):
         return amount
 
     def release(self):
+        ''' Annilates whole payment, returns nothing '''
         if self.status != PaymentStatus.PREAUTH:
             raise ValueError(
                 'Only pre-authorized payments can be released.')
@@ -105,6 +106,7 @@ class AbstractBasePayment(object):
         self.change_status(PaymentStatus.REFUNDED)
 
     def refund(self, amount=None):
+        ''' Refund payment, return amount which was refunded '''
         if self.status != PaymentStatus.CONFIRMED:
             raise ValueError(
                 'Only charged payments can be refunded.')
