@@ -83,12 +83,12 @@ class AbstractBasePayment(object):
         return reverse('process_payment', kwargs={'token': self.token})
 
     def capture(self, amount=None, final=True):
-        """ Captures  a amount """
+        """ Captures an amount of money """
         if self.status != PaymentStatus.PREAUTH:
             raise ValueError(
                 'Only pre-authorized payments can be captured.')
         if not amount:
-            amount = min(self.total-self.captured_amount, Decimal("0"))
+            amount = max(self.total-self.captured_amount, Decimal("0"))
         provider = provider_factory(self.variant)
         provider.capture(self, amount, final)
         self.captured_amount += amount
