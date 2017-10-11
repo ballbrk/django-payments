@@ -51,7 +51,9 @@ class BasePaymentLogic(object):
             self.status = status
             self.message = message
             self.save()
-            status_changed.send(sender=type(self), instance=self)
+            for receiver, result in status_changed.send_robust(sender=type(self), instance=self):
+                if isinstance(result, Exception):
+                    logger.critical(result)
         else:
             self.save()
 
