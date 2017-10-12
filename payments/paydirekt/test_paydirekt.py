@@ -282,7 +282,7 @@ class TestPaydirektProvider(TestCase):
         # real request (private data replaced) encountered, should not error and still be in waiting state
         request.body = json.dumps(sample_request_paydirekt)
         response = provider.process_data(payment, request)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(payment.status, PaymentStatus.WAITING)
         request.body = json.dumps(directsale_open_data)
         response = provider.process_data(payment, request)
@@ -354,8 +354,10 @@ class TestPaydirektProvider(TestCase):
                 response.text = json.dumps(capture_response)
             elif url == provider.path_refund.format(provider.endpoint, payment.transaction_id):
                 response.text = json.dumps(refund_response)
+            elif url == provider.path_close.format(provider.endpoint, payment.transaction_id):
+                response.text = json.dumps(order_close_data)
             else:
-                raise
+                raise Exception(url)
             return response
         mocked_post.side_effect = return_url_data
 
@@ -364,10 +366,11 @@ class TestPaydirektProvider(TestCase):
         self.assertEqual(payment.status, PaymentStatus.PREAUTH)
         self.assertEqual(payment.captured_amount, Decimal("0.0"))
 
+        payment.captured_amount = Decimal(100)
         ret = provider.refund(payment)
         self.assertEqual(ret, Decimal(100))
-        self.assertEqual(payment.status, PaymentStatus.PREAUTH)
-        self.assertEqual(payment.captured_amount, Decimal("0.0"))
+        self.assertEqual(payment.status, PaymentStatus.REFUNDED)
+        self.assertEqual(payment.captured_amount, Decimal("100.0"))
 
     @patch("requests.post")
     @patch("requests.get")

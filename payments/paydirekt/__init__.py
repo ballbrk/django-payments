@@ -223,6 +223,8 @@ class PaydirektProvider(BasicProvider):
         json_response = json.loads(response.text, use_decimal=True)
 
         check_response(response, json_response)
+        payment.transaction_id = json_response["checkoutId"]
+        payment.save()
         raise RedirectNeeded(json_response["_links"]["approve"]["href"])
 
     def process_data(self, payment, request):
@@ -231,12 +233,10 @@ class PaydirektProvider(BasicProvider):
         except (ValueError, TypeError):
             logger.error("paydirekt returned unparseable object")
             return HttpResponseForbidden('FAILED')
-        # ignore such requests
-        # they have no value and may break things
-        # they are maybe copies or existence checks
-        if not "checkoutId" in results:
-            return HttpResponse('OK')
         if not payment.transaction_id:
+            # delay
+            if not "checkoutId" in results:
+                return HttpResponseServerError('no transaction_id')
             payment.transaction_id = results["checkoutId"]
             payment.save()
         if "checkoutStatus" in results:
@@ -283,6 +283,7 @@ class PaydirektProvider(BasicProvider):
     def capture(self, payment, amount=None, final=True):
         if not amount:
             amount = payment.total
+        if not amount: raise Exception(self.total)
         if self.overcapture and amount > payment.total*Decimal("1.1"):
             return None
         elif not self.overcapture and amount > payment.total:
